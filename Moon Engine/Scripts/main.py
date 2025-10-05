@@ -9,14 +9,17 @@ def main():
     root.title("Moon Engine")
     root.geometry("800x600")
 
-    ctk.CTkButton(
-        root,
+    new_project_button = ctk.CTkButton(
+        master=root,
         text="New Project",
-        bg_color="#009620",
-        fg_color="#000000",
-        width=200,
+        width=150,
         height=50,
+        bg_color="#007c11",
+        fg_color="#00A00D",
+        hover_color="#00d11f",
+        text_color="white"
     )
+    new_project_button.place(x=630, y=10)
 
 
 
