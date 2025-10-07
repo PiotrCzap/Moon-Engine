@@ -1,4 +1,7 @@
 import customtkinter as ctk
+from PIL import Image
+from tkinter import filedialog
+import os
 
 root = ctk.CTk()
 
@@ -25,14 +28,29 @@ def main():
     root.mainloop()
 
 def create_new_project():
+    global project_name_entry, project_location_entry
     new_project_window = ctk.CTkToplevel(root)
     new_project_window.title("Create New Project")
     new_project_window.geometry("400x300")
 
-    ctk.CTkEntry(master=new_project_window, width=300, height=10, placeholder_text="Project Name").pack(pady=10)
-    ctk.CTkEntry(master=new_project_window, width=300, height=10, placeholder_text="Project Location").pack(pady=10)
-    ctk.CTkButton(master=new_project_window, corner_radius=0, bg_color="#00d11f", hover_color="#00d11f", fg_color="#00A00D", text="Create", command=lambda: print("Project Created")).place(x=250, y=260)
+    project_name_entry = ctk.CTkEntry(master=new_project_window, width=300, height=10, placeholder_text="Project Name").pack(pady=10)
+    project_location_entry = ctk.CTkEntry(master=new_project_window, width=300, height=10, placeholder_text="Project Location").pack(pady=10)
     
+    create_buton = ctk.CTkButton(master=new_project_window, 
+    corner_radius=0,
+    bg_color="#00d11f",
+    hover_color="#00d11f",
+    fg_color="#00A00D",
+    text="Create",
+    command= lambda: print("Project Created")
+    )
+    create_buton.place(x=250, y=260)
+
+def make_project():
+    pass
+
+
+
 
 main()
 
