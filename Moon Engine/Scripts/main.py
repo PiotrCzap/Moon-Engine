@@ -72,9 +72,16 @@ def make_project():
     
     project_path = os.path.join(project_location, project_name)
     project_file = os.path.join(project_path, f"{project_name}.moonproj")
+    project_data = {
+        "name": project_name,
+        "location": project_location,
+        "version": "1.0"
+    }
     
     try:
         os.makedirs(project_path, exist_ok=True)
+        with open(project_path + "plik.txt", "w") as f:
+            f.write(project_data)
         print(f"Project '{project_name}' created at '{project_location}'")
     except Exception as e:
         print(f"Error creating project: {e}")
