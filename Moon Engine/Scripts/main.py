@@ -4,6 +4,7 @@ from tkinter import filedialog
 import os
 
 root = ctk.CTk()
+moon_engine_version = "0.1.0"
 
 def main():
     ctk.set_appearance_mode("dark")
@@ -61,7 +62,6 @@ def create_new_project():
     create_buton.place(x=250, y=260)
 
 
-
 def make_project():
     project_name = project_name_entry.get()
     project_location = project_location_entry.get()
@@ -75,13 +75,13 @@ def make_project():
     project_data = {
         "name": project_name,
         "location": project_location,
-        "version": "1.0"
+        "version": moon_engine_version
     }
     
     try:
         os.makedirs(project_path, exist_ok=True)
-        with open(project_path + "plik.txt", "w") as f:
-            f.write(project_data)
+        with open(project_file, "w") as f:
+            f.write(project_data.__str__())
         print(f"Project '{project_name}' created at '{project_location}'")
     except Exception as e:
         print(f"Error creating project: {e}")
