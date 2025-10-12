@@ -1,10 +1,11 @@
 import customtkinter as ctk
 from PIL import Image
-from tkinter import filedialog
+import tkinter as tk
 import os
 
 root = ctk.CTk()
 moon_engine_version = "0.1.0"
+projects = []
 
 def main():
     ctk.set_appearance_mode("dark")
@@ -61,6 +62,30 @@ def create_new_project():
     )
     create_buton.place(x=250, y=260)
 
+project_list = ctk.CTkScrollableFrame(master=root, width=750, height=500)
+project_list.place(x=10, y=70)
+
+def load_projects():
+    for project in projects:
+        project_button = ctk.CTkFrame(
+            master=project_list,
+            width=700,
+            height=50,
+            corner_radius=10,
+            border_width=1,
+            border_color="#FFFFFF",
+            bg_color="#1f1f1f",
+            fg_color="#1f1f1f"
+
+        )
+        project_button.pack(pady=10)
+        project_label = ctk.CTkLabel(
+            master=project_button,
+            text=project,
+            text_color="white",
+            font=("Arial", 20)
+        )
+        project_label.place(x=10, y=10)
 
 def make_project():
     project_name = project_name_entry.get()
@@ -85,6 +110,9 @@ def make_project():
         print(f"Project '{project_name}' created at '{project_location}'")
     except Exception as e:
         print(f"Error creating project: {e}")
+
+
+
 
 
 
