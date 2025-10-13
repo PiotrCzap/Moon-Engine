@@ -65,11 +65,12 @@ def Editor_Window():
     filesystem_label = ctk.CTkLabel(
         master=Editor_filesystem_frame,
         text="Filesystem",
-        text_color="white",
+        text_color="White",
         font=(Font, 20)
     )
     filesystem_label.place(x=10, y=5)
     
+
     def Empty_component():
         Empty_component_frame = ctk.CTkFrame(
             master=Editor_hierarchy_frame,
