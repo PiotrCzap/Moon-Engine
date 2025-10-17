@@ -2,6 +2,7 @@ import customtkinter as ctk
 from PIL import Image
 import tkinter as tk
 import os
+import keyboard
 
 Editor = ctk.CTk()
 Font = ("Arial", 20)
@@ -69,27 +70,22 @@ def Editor_Window():
         font=(Font, 20)
     )
     filesystem_label.place(x=10, y=5)
-    
 
-    def Empty_component():
-        Empty_component_frame = ctk.CTkFrame(
-            master=Editor_hierarchy_frame,
-            width=330,
-            height=100,
-            corner_radius=0,
-            fg_color="#000000",
-            border_color="#FFFFFF",
-            border_width=2
-        )
-        Empty_component_frame.place(x=10, y=50)
-
-        Empty_component_label = ctk.CTkLabel(
-            master=Empty_component_frame,
-            text="No Component Selected",
+    Component_Hierarchy_list = ctk.CTkScrollableFrame(master=Editor_hierarchy_frame, width=300, height=550, fg_color="#505050", corner_radius=0, scrollbar_button_color="#505050", scrollbar_button_hover_color="#505050")
+    Component_Hierarchy_list.place(x=10, y=35)
+    for i in range(11):
+        item = ctk.CTkLabel(
+            master=Component_Hierarchy_list,
+            text=f"GameObject_{i}",
             text_color="white",
-            font=(Editor.Font, 20)
+            font=(Font, 16),
+            bg_color="#000000",
+            width=280,
+            height=30
         )
-        Empty_component_label.place(x=50, y=30)
+        item.pack(pady=5, padx=10)
+
+        
 
 
 
