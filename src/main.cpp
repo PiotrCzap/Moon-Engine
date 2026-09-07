@@ -12,7 +12,6 @@ int main(void)
     FPS = 60;
     InitWindow(window_size_x, window_size_y, ENGINE_NAME);
     window_icon = LoadImage("src/Engine Data/icon.png");
-    font = LoadFont("src/Engine Data/fonts/moon_get-Heavy.ttf");
     SetWindowIcon(window_icon);
     SetTargetFPS(FPS);
     Engine_resource_loader();
