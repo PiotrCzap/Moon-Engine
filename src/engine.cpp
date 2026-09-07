@@ -32,11 +32,6 @@ void Engine_resource_loader(void)
     projects_icon = LoadTexture("src/Engine Data/projects icon.png");
     learn_icon = LoadTexture("src/Engine Data/learn icon.png");
     settings_icon = LoadTexture("src/Engine Data/Settings.png");
-
-    // fonts
-    //font = LoadFont("src/Engine Data/fonts/Super Jello.ttf");
-    //font = LoadFont("src/Engine Data/fonts/SoundWave-Regular.ttf");
-    //font = LoadFont("src/Engine Data/fonts/Now Breaks DEMO VERSION.ttf");
 }
 
 void Engine_resource_unloader(void)

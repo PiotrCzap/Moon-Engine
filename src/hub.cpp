@@ -85,6 +85,9 @@ void Project_window(void)
         static int currentDropdownItem = 0;
         static bool dropdownEditMode = false;
 
+        GuiSetStyle(DEFAULT, BACKGROUND_COLOR, 0x282828FF);
+        
+
         GuiSetStyle(DROPDOWNBOX, TEXT_COLOR_NORMAL, ColorToInt(WHITE));
         GuiSetStyle(DROPDOWNBOX, BASE_COLOR_NORMAL, 0x323232FF);
         GuiSetStyle(DROPDOWNBOX, TEXT_COLOR_FOCUSED, ColorToInt(WHITE));
@@ -93,11 +96,11 @@ void Project_window(void)
         GuiSetStyle(DROPDOWNBOX, BORDER_WIDTH, 0);
         GuiSetStyle(DROPDOWNBOX, TEXT_SIZE, 8);
         GuiSetStyle(DROPDOWNBOX, TEXT_PADDING, 3);
-        GuiSetStyle(DROPDOWNBOX, BACKGROUND_COLOR, 255);
-        GuiSetFont(font);
+        GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
+        
 
 
-        if (GuiDropdownBox((Rectangle){ 400.0f, 50.0f, 190.0f, 30.0f }, "sound wave;super jello;Russo_One;Roboto-Black;Quicksilver;Peace Sans;moon_get-Heavy;CODE Bold;BebasNeue-Regular", &currentDropdownItem, dropdownEditMode)) {
+        if (GuiDropdownBox((Rectangle){ 400.0f, 50.0f, 190.0f, 30.0f }, "sound wave;super jello;Russo_One;Roboto-Black;Quicksilver;Peace Sans;moon_get-Heavy;CODE Bold;BebasNeue", &currentDropdownItem, dropdownEditMode)) {
             dropdownEditMode = !dropdownEditMode;
 
             Font oldFont = font;
@@ -136,7 +139,6 @@ void Project_window(void)
                     break;
             }
         
-            // Jeśli załadowano nową czcionkę poprawnie, zwalniamy starą
             if (fontLoaded) {
                 UnloadFont(oldFont);
             }
