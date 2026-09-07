@@ -2,6 +2,7 @@
 #include "raygui.h"
 
 int tabs = 0;
+bool new_project_window_show = false;
 
 void Projects_tab()
 {
@@ -17,7 +18,6 @@ void Settings_window()
 {
     tabs = 3;
 }
-
 
 
 void Project_window(void)
@@ -64,9 +64,21 @@ void Project_window(void)
         Engine_draw_text_better(font, "PROJECTS", (Vector2){260.0f, 10.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 32.0f, 2.0f, WHITE);
         if (GuiButton((Rectangle){590.0f, 10.0f, 190.0f, 40.0f}, "NEW PROJECT")) 
         {
-            Learn_tab(); 
+            new_project_window_show = true;
+            SetWindowSize(1920, 1080);
+            int screen = GetCurrentMonitor();
+            int screenWidth = GetMonitorWidth(screen);
+            int screenHeight = GetMonitorHeight(screen);
+            SetWindowPosition((screenWidth - 1920) / 2, (screenHeight - 1080) / 2);
+            
         }   
     }
+
+    if (new_project_window_show)
+    {
+        Engine_draw_rectangle_shape(0.0f, 0.0f, 1920.0f, 1080.0f, DARKER_GRAY_COLOR);
+    }
+    
 
     // Learn Tab
     if (tabs == 2)
@@ -139,7 +151,8 @@ void Project_window(void)
                     break;
             }
         
-            if (fontLoaded) {
+            if (fontLoaded) 
+            {
                 UnloadFont(oldFont);
             }
         }
