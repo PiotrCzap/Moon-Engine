@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include <stdio.h>
 #include <sys/resource.h>
-#include "imgui.h"
+#include "raygui.h"
 
 // =================================================================================================
 // Zmienne
@@ -50,11 +50,6 @@ void Engine_draw_text_better(const Font font, const char text[], const Vector2 t
 
 void Engine_resource_loader(void);
 void Engine_resource_unloader(void);
-
-// Engine buttons functions
-
-void Engine_button(ButtonAction action, const char text[], const float pos_x, const float pos_y, const float text_pos_x, const float text_pos_y, const float size_x, const float size_y);
-void Engine_button_with_texture(ButtonAction action, const Texture2D texture, const float pos_x, const float pos_y, const float size_x, const float size_y, const float rotation, Color color);
 
 // console debug functions
 

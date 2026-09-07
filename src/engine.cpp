@@ -1,4 +1,6 @@
 #include "main.hpp"
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 
 int window_size_x = 800;
 int window_size_y = 600;
@@ -139,68 +141,4 @@ void Engine_draw_text(const char text[], const float pos_x, const float pos_y, c
 void Engine_draw_text_better(const Font font, const char text[], const Vector2 text_position, const Vector2 text_origin, const float rotation, const float font_size, const float spacing, const Color color)
 {
     DrawTextPro(font, text, text_position, text_origin, rotation, font_size, spacing, color);
-}
-
-// FUNKCJA RYSUJĄCA TEKSTURE
-/**
- * @brief PARAMETRY FUNKCJI "Engine_button"
- * @param action akcja wywoływana przez przycisk
- * @param text tekst na przycisku
- * @param pos_x pozycja tekstury w osi x
- * @param pos_y pozycja tekstury w osi y
- * @param text_pos_x pozycja tekstu w osi x
- * @param text_pos_y pozycja tekstu w osi y
- * @param size_x wielkość tekstury w osi x
- * @param size_y wielkość tekstury w osi y
- * @param rotation obrót tekstury
- * @param color kolor tekstury
- */
-void Engine_button(ButtonAction action, const char text[], const float pos_x, const float pos_y, const float text_pos_x, const float text_pos_y, const float size_x, const float size_y)
-{
-    Vector2 mouse_pos = GetMousePosition();
-    Rectangle button = { pos_x, pos_y, size_x, size_y }; // Użyj przekazanych pozycji i rozmiarów!
-    
-    Color button_color_normal = LIGHT_GRAY_COLOR;
-    Color button_color_hovered = GRAY_COLOR;
-    Color button_color_clicked = DARKER_GRAY_COLOR;
-    Color button_current_color = button_color_normal;
-
-    if (CheckCollisionPointRec(mouse_pos, button))
-    {
-        button_current_color = button_color_hovered;
-
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            button_current_color = button_color_clicked;
-            if (action != nullptr) 
-                action();
-        }
-    }
-    
-    DrawRectangleRec(button, button_current_color);
-    Engine_draw_text_better(font, text, (Vector2){text_pos_x, text_pos_y}, (Vector2){0.0f, 0.0f}, 0.0f, 24.0f, 2.0f, WHITE);
-}
-
-void Engine_button_with_texture(ButtonAction action, const Texture2D texture, const float pos_x, const float pos_y, const float size_x, const float size_y, const float rotation, Color color)
-{
-    Vector2 mouse_pos = GetMousePosition();
-    Rectangle button = { pos_x, pos_y, size_x, size_y }; // Użyj przekazanych pozycji i rozmiarów!
-    
-    Color button_color_normal = LIGHT_GRAY_COLOR;
-    Color button_color_hovered = GRAY_COLOR;
-    Color button_color_clicked = DARKER_GRAY_COLOR;
-    Color button_current_color = button_color_normal;
-
-    if (CheckCollisionPointRec(mouse_pos, button))
-    {
-        button_current_color = button_color_hovered;
-
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            button_current_color = button_color_clicked;
-            if (action != nullptr) 
-                action();
-        }
-    }
-    Engine_draw_rectangle_shape_with_texture(texture, pos_x, pos_y, size_x, size_y, rotation, color);
 }
