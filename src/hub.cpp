@@ -4,17 +4,17 @@
 int tabs = 0;
 bool new_project_window_show = false;
 
-void Projects_tab()
+void Projects_tab(void)
 {
     tabs = 1;
 }
 
-void Learn_tab()
+void Learn_tab(void)
 {
     tabs = 2;
 }
 
-void Settings_window()
+void Settings_window(void)
 {
     tabs = 3;
 }
@@ -26,14 +26,10 @@ void Project_window(void)
     Engine_draw_rectangle_shape(0.0f, 0.0f, 256.0f, 600.0f, DARK_GRAY_COLOR);
 
     // texts
-
     Engine_draw_text_better(font, ENGINE_NAME, (Vector2){10.0f, 10.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 32.0f, 2.0f, WHITE);
     Engine_draw_text_better(font, ENGINE_VERSION, (Vector2){10.0f, 580.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 16.0f, 2.0f, WHITE);
 
     // Buttons
-
-    //Engine_button(Projects_tab, "PROJECTS", 15.0f, 60.0f, 70.0f, 70.0f, 200.0f, 40.0f);
-    //Engine_button(Learn_tab, "LEARN", 15.0f, 120.0f, 60.0f, 130.0f, 200.0f, 40.0f);
     GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL,  0xFFFFFFFF);
     GuiSetStyle(BUTTON, TEXT_COLOR_FOCUSED, 0xFFFFFFFF);
     GuiSetStyle(BUTTON, TEXT_COLOR_PRESSED, 0xFFFFFFFF);
@@ -77,6 +73,11 @@ void Project_window(void)
     if (new_project_window_show)
     {
         Engine_draw_rectangle_shape(0.0f, 0.0f, 1920.0f, 1080.0f, DARKER_GRAY_COLOR);
+        inspector();
+        file_manager();
+        hierarchy();
+        viewport();
+
     }
     
 
@@ -98,8 +99,6 @@ void Project_window(void)
         static bool dropdownEditMode = false;
 
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, 0x282828FF);
-        
-
         GuiSetStyle(DROPDOWNBOX, TEXT_COLOR_NORMAL, ColorToInt(WHITE));
         GuiSetStyle(DROPDOWNBOX, BASE_COLOR_NORMAL, 0x323232FF);
         GuiSetStyle(DROPDOWNBOX, TEXT_COLOR_FOCUSED, ColorToInt(WHITE));
@@ -118,37 +117,18 @@ void Project_window(void)
             Font oldFont = font;
             bool fontLoaded = true;
 
-            switch (currentDropdownItem) {
-                case 0:
-                    font = LoadFont("src/Engine Data/fonts/Super Jello.ttf");
-                    break;
-                case 1:
-                    font = LoadFont("src/Engine Data/fonts/SoundWave-Regular.ttf");
-                    break;
-                case 2:
-                    font = LoadFont("src/Engine Data/fonts/Russo_One.ttf");
-                    break;
-                case 3:
-                    font = LoadFont("src/Engine Data/fonts/Roboto-Black.ttf");
-                    break;
-                 case 4:
-                    font = LoadFont("src/Engine Data/fonts/Quicksilver.ttf");
-                    break;
-                case 5:
-                    font = LoadFont("src/Engine Data/fonts/Peace Sans.otf");
-                    break;
-                case 6:
-                    font = LoadFont("src/Engine Data/fonts/moon_get-Heavy.ttf");
-                    break;
-                case 7:
-                    font = LoadFont("src/Engine Data/fonts/CODE Bold.otf");
-                    break;
-                case 8:
-                    font = LoadFont("src/Engine Data/fonts/BebasNeue-Regular.ttf");
-                    break;
-                default:
-                    fontLoaded = false;
-                    break;
+            switch (currentDropdownItem)
+            {
+                case 0: font = LoadFont("src/Engine Data/fonts/Super Jello.ttf"); break;
+                case 1: font = LoadFont("src/Engine Data/fonts/SoundWave-Regular.ttf"); break;
+                case 2: font = LoadFont("src/Engine Data/fonts/Russo_One.ttf"); break;
+                case 3: font = LoadFont("src/Engine Data/fonts/Roboto-Black.ttf"); break;
+                case 4: font = LoadFont("src/Engine Data/fonts/Quicksilver.ttf"); break;
+                case 5: font = LoadFont("src/Engine Data/fonts/Peace Sans.otf"); break;
+                case 6: font = LoadFont("src/Engine Data/fonts/moon_get-Heavy.ttf"); break;
+                case 7: font = LoadFont("src/Engine Data/fonts/CODE Bold.otf"); break;
+                case 8: font = LoadFont("src/Engine Data/fonts/BebasNeue-Regular.ttf"); break;
+                default: fontLoaded = false; break;
             }
         
             if (fontLoaded) 

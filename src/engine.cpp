@@ -12,6 +12,7 @@ const Color LIGHT_GRAY_COLOR = { 60u, 60u, 60u, 255u };
 const Color GRAY_COLOR = { 50u, 50u, 50u, 255u };
 const Color DARK_GRAY_COLOR = { 40u, 40u, 40u, 255u };
 const Color DARKER_GRAY_COLOR = { 30u, 30u, 30u, 255u };
+const Color BLACK_COLOR = { 0u, 0u, 0u, 255u };
 
 int font_selected;
 Font font;

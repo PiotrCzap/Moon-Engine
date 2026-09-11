@@ -41,4 +41,5 @@ while (!WindowShouldClose())
     UnloadImage(window_icon);
     Engine_resource_unloader();
     CloseWindow();
+    return 0;
 }

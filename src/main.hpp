@@ -22,6 +22,7 @@ extern const Color LIGHT_GRAY_COLOR;
 extern const Color GRAY_COLOR;
 extern const Color DARK_GRAY_COLOR;
 extern const Color DARKER_GRAY_COLOR;
+extern const Color BLACK_COLOR;
 
 // fonts
 
@@ -59,6 +60,13 @@ void print_fps();
 
 void Projects_tab();
 void Project_window(void);
+
+// editor.cpp
+
+void inspector();
+void file_manager();
+void hierarchy();
+void viewport();
 
 struct transform
 {
