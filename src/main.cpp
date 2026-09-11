@@ -34,6 +34,8 @@ while (!WindowShouldClose())
         
             ClearBackground(BLACK);
             Project_window();
+            hierarchy();
+            
             
 
         EndDrawing();

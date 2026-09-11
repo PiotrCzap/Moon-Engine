@@ -1,6 +1,5 @@
 #include "main.hpp"
 
-
 void inspector()
 {
     Engine_draw_rectangle_shape(0.0f, 0.0f, 300.0f, 700.0f, GRAY_COLOR);
@@ -20,15 +19,15 @@ void hierarchy()
     GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL,  0xFFFFFFFF);
     GuiSetStyle(BUTTON, TEXT_COLOR_FOCUSED, 0xFFFFFFFF);
     GuiSetStyle(BUTTON, TEXT_COLOR_PRESSED, 0xFFFFFFFF);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
-    GuiSetStyle(BUTTON, TEXT_PADDING, 10);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 12);
+    GuiSetStyle(BUTTON, TEXT_PADDING, 8);
     GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, 0);
     GuiSetStyle(BUTTON, BORDER_WIDTH, 0);
-    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,  0x323232FF);
+    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,  ColorToInt(DARK_GRAY_COLOR));
     GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, 0x3C3C3CFF);
     GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, 0x1E1E1EFF);
     GuiSetFont(font);
-    if (GuiButton((Rectangle){15.0f, 60.0f, 50.0f, 40.0f}, "ADD")) {  }
+    if (GuiButton((Rectangle){1660.0f, 40.0f, 50.0f, 25.0f}, "ADD")) {}
 }
 
 void viewport()

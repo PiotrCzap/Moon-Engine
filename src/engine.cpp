@@ -17,9 +17,6 @@ const Color BLACK_COLOR = { 0u, 0u, 0u, 255u };
 int font_selected;
 Font font;
 
-struct GameObject player;
-struct GameObject test_text;
-
 // FUNKCJA PRINTUJĄCA FPSY W KONSOLI
 void print_fps(void)
 {
