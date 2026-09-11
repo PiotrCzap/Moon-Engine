@@ -15,6 +15,7 @@ extern int window_size_y;
 extern const char* ENGINE_NAME;
 extern const char* ENGINE_VERSION;
 extern int FPS;
+extern bool show_object;
 
 // colors
 
@@ -67,11 +68,13 @@ void inspector();
 void file_manager();
 void hierarchy();
 void viewport();
+void Engine_add_game_object(const Texture2D texture, const float pos_x, const float pos_y, const float size_x, const float size_y, const float rotation, const Color color, const bool visible);
 
 struct transform
 {
     float pos_x, pos_y;
     float size_x, size_y;
+    float rotation;
 };
 
 struct sprite_renderer
@@ -86,7 +89,7 @@ struct text_renderer
     char *text;
     float font_size;
     Color color;
-    int visible;
+    bool visible;
 };
 
 struct GameObject

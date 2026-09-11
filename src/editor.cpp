@@ -1,5 +1,7 @@
 #include "main.hpp"
 
+bool show_object = false;
+
 void inspector()
 {
     Engine_draw_rectangle_shape(0.0f, 0.0f, 300.0f, 700.0f, GRAY_COLOR);
@@ -27,11 +29,15 @@ void hierarchy()
     GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, 0x3C3C3CFF);
     GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, 0x1E1E1EFF);
     GuiSetFont(font);
-    if (GuiButton((Rectangle){1660.0f, 40.0f, 50.0f, 25.0f}, "ADD")) {}
+    if (GuiButton((Rectangle){1660.0f, 40.0f, 50.0f, 25.0f}, "ADD")) {show_object = true;}
 }
 
 void viewport()
 {
     Engine_draw_rectangle_shape(300.0f, 0.0f, 1350.0f, 700.0f, BLACK_COLOR);
     Engine_draw_text_better(font, "VIEWPORT", (Vector2){310.0f, 10.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 24.0f, 0.0f, WHITE);
+    if (show_object)
+    {
+        Engine_add_game_object(null_txt, 900, 300, 100, 100, 0, WHITE, show_object);
+    }
 }

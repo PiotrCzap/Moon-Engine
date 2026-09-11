@@ -135,3 +135,30 @@ void Engine_draw_text_better(const Font font, const char text[], const Vector2 t
 {
     DrawTextPro(font, text, text_position, text_origin, rotation, font_size, spacing, color);
 }
+
+void Engine_add_game_object(const Texture2D texture, const float pos_x, const float pos_y, const float size_x, const float size_y, const float rotation, const Color color, const bool visible)
+{
+    struct GameObject game_object;
+
+    game_object.transform.pos_x = pos_x;
+    game_object.transform.pos_y = pos_y;
+    game_object.transform.size_x = size_x;
+    game_object.transform.size_y = size_y;
+    game_object.transform.rotation = rotation;
+    game_object.sprite_renderer.texture = texture;
+    game_object.sprite_renderer.color = color;
+    game_object.sprite_renderer.visible = visible;
+
+    if (game_object.sprite_renderer.visible) 
+    {
+        Engine_draw_rectangle_shape_with_texture(
+            game_object.sprite_renderer.texture,
+            game_object.transform.pos_x,
+            game_object.transform.pos_y,
+            game_object.transform.size_x,
+            game_object.transform.size_y,
+            game_object.transform.rotation,
+            game_object.sprite_renderer.color
+        );
+    }
+}
