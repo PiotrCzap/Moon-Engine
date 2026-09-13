@@ -3,11 +3,14 @@
 #include "raylib.h"
 #include <stdio.h>
 #include <sys/resource.h>
+#include <string.h>
 #include "raygui.h"
 
 // =================================================================================================
-// Zmienne
+// Variables
 // =================================================================================================
+
+extern bool debug_mode;
 
 inline Image window_icon;
 extern int window_size_x;
@@ -69,7 +72,6 @@ void file_manager();
 void hierarchy();
 void viewport();
 void Engine_add_game_object(const Texture2D texture, const float pos_x, const float pos_y, const float size_x, const float size_y, const float rotation, const Color color, const bool visible);
-
 struct transform
 {
     float pos_x, pos_y;
@@ -94,7 +96,12 @@ struct text_renderer
 
 struct GameObject
 {
+   char name[32];
+   bool isDragging;
    struct transform transform;
    struct sprite_renderer sprite_renderer;
    struct text_renderer text_renderer;
 };
+
+extern GameObject all_objs[];
+extern int count;

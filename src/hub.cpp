@@ -1,5 +1,5 @@
-#include "main.hpp"
-#include "raygui.h"
+#include "include/main.hpp"
+#include "include/raygui.h"
 
 int tabs = 0;
 bool new_project_window_show = false;
