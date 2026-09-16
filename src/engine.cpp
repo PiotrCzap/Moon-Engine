@@ -1,9 +1,9 @@
 #include "include/main.hpp"
 #define RAYGUI_IMPLEMENTATION
 #include "include/raygui.h"
-#define MAX_OBJS 1000
-GameObject all_objs[MAX_OBJS];
-int count = 0;
+#include "imgui/imgui.h"
+#include "imgui/rlImGui.h"
+#include <unistd.h>
 
 bool debug_mode = true;
 
@@ -23,6 +23,7 @@ int font_selected;
 Font font;
 
 struct GameObject game_object;
+int selected_object_index = -1;
 
 // FUNCTION PRINTS FPS IN TERMINAL
 void print_fps(void)
@@ -157,53 +158,17 @@ void Engine_draw_text_better(const Font font, const char text[], const Vector2 t
 
 void Engine_add_game_object(const Texture2D texture, const float pos_x, const float pos_y, const float size_x, const float size_y, const float rotation, const Color color, const bool visible)
 {
-    // Używamy static, żeby pozycja i stan przeciągania pamiętały zmiany między klatkami
-    static float myObjX = pos_x;
-    static float myObjY = pos_y;
-    float myObjWidth = size_x;
-    float myObjHeight = size_y;
-    static bool isDragging = false;
+    struct GameObject game_object;
 
-    // Prostokąt do wykrywania kliknięcia myszką na aktualnej pozycji obiektu
-    Rectangle objRect = { myObjX, myObjY, myObjWidth, myObjHeight };
-    
-    // 1. Kliknięcie wewnątrz obiektu włącza przeciąganie
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), objRect)) {
-        isDragging = true;
-    }
-    
-    // 2. Jeśli przeciągamy, zmieniamy współrzędne o ruch myszy
-    if (isDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        Vector2 delta = GetMouseDelta();
-        myObjX += delta.x;
-        myObjY += delta.y;
-    }
-    
-    // 3. Puszczenie przycisku myszy kończy przeciąganie
-    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-        isDragging = false;
-    }
-
-    // Zapisujemy zaktualizowaną pozycję do Twojej struktury transform
-    game_object.transform.pos_x = myObjX;
-    game_object.transform.pos_y = myObjY;
+    game_object.transform.pos_x = pos_x;
+    game_object.transform.pos_y = pos_y;
     game_object.transform.size_x = size_x;
     game_object.transform.size_y = size_y;
     game_object.transform.rotation = rotation;
-    
-    // Zapisujemy dane renderowania
     game_object.sprite_renderer.texture = texture;
     game_object.sprite_renderer.color = color;
     game_object.sprite_renderer.visible = visible;
 
-    // 4. Tryb debugowania - rysuje czerwoną obramówkę wokół obiektu (podążającą za nim)
-    if (debug_mode)
-    {
-        Rectangle debugRec = { game_object.transform.pos_x - 2.0f, game_object.transform.pos_y - 2.0f, game_object.transform.size_x + 4.0f, game_object.transform.size_y + 4.0f };
-        DrawRectangleLinesEx(debugRec, 2.0f, RED);
-    }
-
-    // 5. Rysowanie właściwej tekstury obiektu
     if (game_object.sprite_renderer.visible) 
     {
         Engine_draw_rectangle_shape_with_texture(
@@ -216,4 +181,19 @@ void Engine_add_game_object(const Texture2D texture, const float pos_x, const fl
             game_object.sprite_renderer.color
         );
     }
+}
+
+
+void Engine_debug_window()
+{
+    if (debug_mode)
+    {
+        ImGui::Begin("debug window");
+        ImGui::SetWindowSize(ImVec2(150, 30), ImGuiCond_FirstUseEver);
+        ImGui::Text("FPS: %d", FPS);
+        ImGui::Text("selected object: %d", selected_object_index);
+        ImGui::End();
+    }
+    
+    
 }

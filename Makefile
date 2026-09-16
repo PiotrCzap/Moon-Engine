@@ -6,8 +6,8 @@ SRC_DIR = src
 OBJ_DIR = .obj
 BUILD_DIR = build
 
-# Szukamy plików z rozszerzeniem .cpp zamiast .c
-SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
+# Szukamy plików .cpp w głównym folderze src ORAZ w podfolderze src/imgui
+SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/imgui/*.cpp)
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_FILES))
 TARGET = $(BUILD_DIR)/Moon-Engine
 
@@ -17,7 +17,7 @@ $(TARGET): $(OBJS)
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(OBJS) -o $@ $(LIBS)
 
-# Reguła budowania dla plików .cpp i użycie zmiennej $(CXX)
+# Reguła budowania dla plików .cpp (działa też z podfolderami)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@

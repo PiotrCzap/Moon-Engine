@@ -6,6 +6,7 @@
 #include <string.h>
 #include "raygui.h"
 
+
 // =================================================================================================
 // Variables
 // =================================================================================================
@@ -56,9 +57,10 @@ void Engine_draw_text_better(const Font font, const char text[], const Vector2 t
 void Engine_resource_loader(void);
 void Engine_resource_unloader(void);
 
-// console debug functions
+// debug functions
 
 void print_fps();
+void Engine_debug_window();
 
 // hub functions
 
@@ -103,5 +105,72 @@ struct GameObject
    struct text_renderer text_renderer;
 };
 
-extern GameObject all_objs[];
-extern int count;
+extern int selected_object_index;
+
+class New_GameObject
+{
+public:
+    GameObject data;
+
+    // update functions (obsługuje przeciąganie myszką i granice viewportu)
+    void Update(bool& is_something_dragging, int index) 
+    {
+        Rectangle r = { data.transform.pos_x, data.transform.pos_y, data.transform.size_x, data.transform.size_y };
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r)) {
+        selected_object_index = index; // Selecting Object in Inspector
+
+        if (!is_something_dragging) {
+            data.isDragging = true;
+            is_something_dragging = true;
+        }
+        }
+
+        // Chwytamy obiekt tylko wtedy, gdy żaden inny nie jest przeciągany
+        if (!is_something_dragging && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r)) {
+            data.isDragging = true;
+            is_something_dragging = true;
+        }
+
+        // Object dragging
+        if (data.isDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            Vector2 d = GetMouseDelta();
+            data.transform.pos_x += d.x;
+            data.transform.pos_y += d.y;
+
+            // Opcjonalne: blokada granic Viewportu (300 do 1650, 0 do 700)
+            if (data.transform.pos_x < 300.0f) data.transform.pos_x = 300.0f;
+            if (data.transform.pos_x > 1650.0f - data.transform.size_x) data.transform.pos_x = 1650.0f - data.transform.size_x;
+            if (data.transform.pos_y < 0.0f) data.transform.pos_y = 0.0f;
+            if (data.transform.pos_y > 700.0f - data.transform.size_y) data.transform.pos_y = 700.0f - data.transform.size_y;
+        }
+
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            data.isDragging = false;
+        }
+    }
+
+    
+    void Draw(bool debug_mode) 
+    {
+        // draws red outline on object
+        if (debug_mode)
+        {
+            Rectangle debugRec = { 
+                data.transform.pos_x - 2.0f, 
+                data.transform.pos_y - 2.0f, 
+                data.transform.size_x + 4.0f, 
+                data.transform.size_y + 4.0f 
+            };
+            DrawRectangleLinesEx(debugRec, 2.0f, RED);
+        }
+
+        // draws texture on object
+        Engine_draw_rectangle_shape_with_texture(
+            data.sprite_renderer.texture,
+            data.transform.pos_x, data.transform.pos_y,
+            data.transform.size_x, data.transform.size_y,
+            data.transform.rotation, data.sprite_renderer.color
+        );
+    }
+};

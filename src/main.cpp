@@ -1,5 +1,7 @@
 #include "include/main.hpp"
 #include "include/raygui.h"
+#include "imgui/imgui.h"
+#include "imgui/rlImGui.h"
 
 // =================================================================================================
 // FUNKCJA GŁÓWNA
@@ -16,6 +18,7 @@ int main(void)
     SetWindowIcon(window_icon);
     SetTargetFPS(FPS);
     Engine_resource_loader();
+    rlImGuiSetup(true);
     
 
 while (!WindowShouldClose())
@@ -31,14 +34,16 @@ while (!WindowShouldClose())
         // ==========================================
 
         BeginDrawing();
+
+        ClearBackground(BLACK);
+            rlImGuiBegin();
         
-            ClearBackground(BLACK);
-            Project_window();
-            hierarchy();
-            
-            
+                Engine_debug_window();
+                Project_window();
+                hierarchy();
             
 
+            rlImGuiEnd();
         EndDrawing();
     }
     UnloadImage(window_icon);

@@ -1,6 +1,10 @@
 #include "include/main.hpp"
+#include "imgui/imgui.h"
+#include "imgui/rlImGui.h"
+New_GameObject all_objs[1000];
+int count = 0;
 
-bool show_object = false; // Object is visible
+bool show_object = false;
 
 void inspector()
 {
@@ -16,12 +20,8 @@ void file_manager()
 
 void hierarchy()
 {
-    float start_pos = 100.0f;
-
     Engine_draw_rectangle_shape(1650.0f, 0.0f, 300.0f, 700.0f, GRAY_COLOR);
     Engine_draw_text_better(font, "HIERARCHY", (Vector2){1660.0f, 10.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 24.0f, 0.0f, WHITE);
-
-    // button styles
     GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL,  0xFFFFFFFF);
     GuiSetStyle(BUTTON, TEXT_COLOR_FOCUSED, 0xFFFFFFFF);
     GuiSetStyle(BUTTON, TEXT_COLOR_PRESSED, 0xFFFFFFFF);
@@ -33,26 +33,90 @@ void hierarchy()
     GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, 0x3C3C3CFF);
     GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, 0x1E1E1EFF);
     GuiSetFont(font);
-
-    static bool button_clicked = false;
-
-    if (GuiButton((Rectangle){1660.0f, 40.0f, 50.0f, 25.0f}, "ADD")) {
-        if (!button_clicked) 
+    
+    static double last_click_time = 0.0;
+    
+    if (GuiButton((Rectangle){1660.0f, 40.0f, 50.0f, 25.0f}, "ADD")) 
+    {
+        double current_time = GetTime();
+        
+        if (current_time - last_click_time > 0.10)
         {
+            last_click_time = current_time;
+            
             if (count < 1000) 
             {
-                all_objs[count] = (GameObject){"object_", false, {900.0f, 300.0f, 100.0f, 100.0f, 0.0f}, {null_txt, WHITE, 1}, {0}};
+                int objects_per_row = 5;
+                float spacing = 110.0f;
+                
+                int row = count / objects_per_row;
+                int col = count % objects_per_row;
+
+                float start_spawn_x = 800.0f; 
+                float start_spawn_y = 300.0f; 
+
+                float pos_x = start_spawn_x + (col * spacing);
+                float pos_y = start_spawn_y + (row * spacing);
+                
+                // Creates object
+                all_objs[count].data = (GameObject){
+                    "object_", 
+                    false, 
+                    {pos_x, pos_y, 100.0f, 100.0f, 0.0f}, 
+                    {null_txt, WHITE, 1}, 
+                    {0}
+                };
                 count++;
             }
-            button_clicked = true;
         }
-    } 
-    else 
+    }
+
+    // STRONICOWANIE
+    static int page_offset = 0;
+    const int items_per_page = 34;
+    const float start_y = 80.0f; 
+    float item_height = 16.0f;
+
+    Rectangle panelRect = {1650.0f, 0.0f, 300.0f, 700.0f};
+    Vector2 mousePos = GetMousePosition();
+    
+    if (CheckCollisionPointRec(mousePos, panelRect))
     {
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) 
+        float wheel = GetMouseWheelMove();
+        if (wheel != 0)
         {
-            button_clicked = false;
+            page_offset -= (int)wheel * items_per_page;
+            if (page_offset < 0) page_offset = 0;
+            if (page_offset >= count && count > 0)
+            {
+                page_offset = ((count - 1) / items_per_page) * items_per_page;
+            }
         }
+    }
+
+    // draws object buttons
+    for (int i = 0; i < items_per_page; i++)
+    {
+        int global_index = page_offset + i;
+        if (global_index >= count) break; 
+
+        float current_y = start_y + (i * (item_height + 2.0f));
+
+        Rectangle itemRect = {1660.0f, current_y, 280.0f, item_height};
+        bool hovered = CheckCollisionPointRec(mousePos, itemRect);
+
+        if (hovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            selected_object_index = global_index;
+        }
+
+        // hover color
+        Color rowColor = hovered ? (Color){ 60, 60, 60, 255 } : (Color){ 42, 42, 42, 255 };
+        Engine_draw_rectangle_shape(itemRect.x, itemRect.y, itemRect.width, itemRect.height, rowColor);
+
+        char name_buffer[64];
+        snprintf(name_buffer, sizeof(name_buffer), "object_%d", global_index + 1);
+        Engine_draw_text_better(font, name_buffer, (Vector2){itemRect.x + 16.0f, itemRect.y + 2.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 12.0f, 0.0f, WHITE);
     }
 }
 
@@ -61,39 +125,21 @@ void viewport()
     Engine_draw_rectangle_shape(300.0f, 0.0f, 1350.0f, 700.0f, BLACK_COLOR);
     Engine_draw_text_better(font, "VIEWPORT", (Vector2){310.0f, 10.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 24.0f, 0.0f, WHITE);
 
-    for (int i = 0; i < count; i++) 
+    bool is_something_dragging = false;
+
+    // object dragging
+    for (int i = 0; i < count; i++)
     {
-        Rectangle r = { all_objs[i].transform.pos_x, all_objs[i].transform.pos_y, all_objs[i].transform.size_x, all_objs[i].transform.size_y };
-
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r))
-            all_objs[i].isDragging = true;
-
-        if (all_objs[i].isDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
+        if (all_objs[i].data.isDragging)
         {
-            Vector2 d = GetMouseDelta();
-            all_objs[i].transform.pos_x += d.x;
-            all_objs[i].transform.pos_y += d.y;
+            is_something_dragging = true;
+            break;
         }
+    }
 
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-            all_objs[i].isDragging = false;
-
-        if (debug_mode)
-        {
-            Rectangle debugRec = { 
-                all_objs[i].transform.pos_x - 2.0f, 
-                all_objs[i].transform.pos_y - 2.0f, 
-                all_objs[i].transform.size_x + 4.0f, 
-                all_objs[i].transform.size_y + 4.0f 
-            };
-            DrawRectangleLinesEx(debugRec, 2.0f, RED);
-        }
-
-        Engine_draw_rectangle_shape_with_texture(
-            all_objs[i].sprite_renderer.texture,
-            all_objs[i].transform.pos_x, all_objs[i].transform.pos_y,
-            all_objs[i].transform.size_x, all_objs[i].transform.size_y,
-            all_objs[i].transform.rotation, all_objs[i].sprite_renderer.color
-        );
+    for (int i = count - 1; i >= 0; i--)
+    {
+        all_objs[i].Update(is_something_dragging, i);
+        all_objs[i].Draw(debug_mode);
     }
 }
