@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 bool debug_mode = true;
+bool editor_mode = false;
 
 int window_size_x = 800;
 int window_size_y = 600;
@@ -182,7 +183,6 @@ void Engine_add_game_object(const Texture2D texture, const float pos_x, const fl
         );
     }
 }
-
 
 void Engine_debug_window()
 {

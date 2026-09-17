@@ -3,7 +3,7 @@
 
 int tabs = 0;
 bool new_project_window_show = false;
-bool editor_mode;
+extern bool editor_mode;
 
 void Projects_tab(void)
 {
