@@ -19,6 +19,8 @@ void inspector()
         ImGui::SetNextWindowPos(ImVec2(10.0f, 45.0f));
         ImVec2 contentSize = ImVec2(300.0f, 650.0f);
         ImGui::SetNextWindowSize(contentSize);
+        
+        // imgui styles
 
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
@@ -27,7 +29,7 @@ void inspector()
 
         ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
         
-        // Wyświetlanie nazwy wybranego obiektu
+        // object name
         char buffer[128];
         snprintf(buffer, sizeof(buffer), "Object: object_%d", selected_object_index + 1);
         ImGui::Text("%s", buffer);
@@ -39,16 +41,20 @@ void inspector()
         ImGui::Separator();
         ImGui::Spacing();
         
+        // object position x
         ImGui::Text("Position X");
         ImGui::DragFloat("##PosX", &obj->transform.pos_x, 1.0f, -10000.0f, 10000.0f, "%.1f");
 
+        // object position y
         ImGui::Text("Position Y");
         ImGui::DragFloat("##PosY", &obj->transform.pos_y, 1.0f, -10000.0f, 10000.0f, "%.1f");
 
+        // object size x
         ImGui::Spacing();
         ImGui::Text("Width");
         ImGui::DragFloat("##Width", &obj->transform.size_x, 1.0f, 1.0f, 5000.0f, "%.1f");
 
+        // object size y
         ImGui::Text("Height");
         ImGui::DragFloat("##Height", &obj->transform.size_y, 1.0f, 1.0f, 5000.0f, "%.1f");
 

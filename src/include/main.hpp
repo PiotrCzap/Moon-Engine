@@ -118,14 +118,15 @@ public:
     {
         Rectangle r = { data.transform.pos_x, data.transform.pos_y, data.transform.size_x, data.transform.size_y };
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r)) {
-        selected_object_index = index; // Selecting Object in Inspector
-
-        if (!is_something_dragging)
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r))
         {
-            data.isDragging = true;
-            is_something_dragging = true;
-        }
+            selected_object_index = index; // Selecting Object in Inspector
+
+            if (!is_something_dragging)
+            {
+                data.isDragging = true;
+                is_something_dragging = true;
+            }
         }
 
         // Chwytamy obiekt tylko wtedy, gdy żaden inny nie jest przeciągany
@@ -136,7 +137,8 @@ public:
         }
 
         // Object dragging
-        if (data.isDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        if (data.isDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
             Vector2 d = GetMouseDelta();
             data.transform.pos_x += d.x;
             data.transform.pos_y += d.y;
@@ -148,7 +150,8 @@ public:
             if (data.transform.pos_y > 700.0f - data.transform.size_y) data.transform.pos_y = 700.0f - data.transform.size_y;
         }
 
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        {
             data.isDragging = false;
         }
     }
