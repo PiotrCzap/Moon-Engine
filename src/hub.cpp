@@ -3,6 +3,7 @@
 
 int tabs = 0;
 bool new_project_window_show = false;
+bool editor_mode;
 
 void Projects_tab(void)
 {
@@ -18,7 +19,6 @@ void Settings_window(void)
 {
     tabs = 3;
 }
-
 
 void Project_window(void)
 {
@@ -41,17 +41,16 @@ void Project_window(void)
     GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, 0x3C3C3CFF);
     GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, 0x1E1E1EFF);
     GuiSetFont(font);
-    if (GuiButton((Rectangle){15.0f, 60.0f, 190.0f, 40.0f}, "   PROJECTS")) { Projects_tab(); }
-    if (GuiButton((Rectangle){15.0f, 120.0f, 190.0f, 40.0f}, "LEARN   ")) { Learn_tab(); }
-    if (GuiButton((Rectangle){15.0f, 180.0f, 190.0f, 40.0f}, "  SETTINGS ")) { Settings_window(); }
-
-    
-    
+    if (editor_mode == false)
+    {
+        if (GuiButton((Rectangle){15.0f, 60.0f, 190.0f, 40.0f}, "   PROJECTS")) { Projects_tab(); }
+        if (GuiButton((Rectangle){15.0f, 120.0f, 190.0f, 40.0f}, "LEARN   ")) { Learn_tab(); }
+        if (GuiButton((Rectangle){15.0f, 180.0f, 190.0f, 40.0f}, "  SETTINGS ")) { Settings_window(); }
+    }
 
     Engine_draw_rectangle_shape_with_texture(projects_icon, 25.0f, 65.0f, 30.0f, 30.0f, 0.0f, WHITE);
     Engine_draw_rectangle_shape_with_texture(learn_icon, 25.0f, 124.0f, 30.0f, 30.0f, 0.0f, WHITE);
     Engine_draw_rectangle_shape_with_texture(settings_icon, 20.0f, 180.0f, 40.0f, 40.0f, 0.0f, WHITE);
-    
     
     // Projects Tab
     if (tabs == 1)
@@ -66,7 +65,7 @@ void Project_window(void)
             int screenWidth = GetMonitorWidth(screen);
             int screenHeight = GetMonitorHeight(screen);
             SetWindowPosition((screenWidth - 1920) / 2, (screenHeight - 1080) / 2);
-            
+            editor_mode = true;
         }   
     }
 
@@ -111,7 +110,7 @@ void Project_window(void)
         
 
 
-        if (GuiDropdownBox((Rectangle){ 400.0f, 50.0f, 190.0f, 30.0f }, "sound wave;super jello;Russo_One;Roboto-Black;Quicksilver;Peace Sans;moon_get-Heavy;CODE Bold;BebasNeue", &currentDropdownItem, dropdownEditMode)) {
+        if (GuiDropdownBox((Rectangle){ 400.0f, 50.0f, 190.0f, 30.0f }, "super jello;Russo_One;Roboto-Black;Quicksilver;Peace Sans;moon_get-Heavy;CODE Bold;BebasNeue", &currentDropdownItem, dropdownEditMode)) {
             dropdownEditMode = !dropdownEditMode;
 
             Font oldFont = font;
@@ -120,14 +119,13 @@ void Project_window(void)
             switch (currentDropdownItem)
             {
                 case 0: font = LoadFont("src/Engine Data/fonts/Super Jello.ttf"); break;
-                case 1: font = LoadFont("src/Engine Data/fonts/SoundWave-Regular.ttf"); break;
-                case 2: font = LoadFont("src/Engine Data/fonts/Russo_One.ttf"); break;
-                case 3: font = LoadFont("src/Engine Data/fonts/Roboto-Black.ttf"); break;
-                case 4: font = LoadFont("src/Engine Data/fonts/Quicksilver.ttf"); break;
-                case 5: font = LoadFont("src/Engine Data/fonts/Peace Sans.otf"); break;
-                case 6: font = LoadFont("src/Engine Data/fonts/moon_get-Heavy.ttf"); break;
-                case 7: font = LoadFont("src/Engine Data/fonts/CODE Bold.otf"); break;
-                case 8: font = LoadFont("src/Engine Data/fonts/BebasNeue-Regular.ttf"); break;
+                case 1: font = LoadFont("src/Engine Data/fonts/Russo_One.ttf"); break;
+                case 2: font = LoadFont("src/Engine Data/fonts/Roboto-Black.ttf"); break;
+                case 3: font = LoadFont("src/Engine Data/fonts/Quicksilver.ttf"); break;
+                case 4: font = LoadFont("src/Engine Data/fonts/Peace Sans.otf"); break;
+                case 5: font = LoadFont("src/Engine Data/fonts/moon_get-Heavy.ttf"); break;
+                case 6: font = LoadFont("src/Engine Data/fonts/CODE Bold.otf"); break;
+                case 7: font = LoadFont("src/Engine Data/fonts/BebasNeue-Regular.ttf"); break;
                 default: fontLoaded = false; break;
             }
         

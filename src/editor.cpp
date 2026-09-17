@@ -10,6 +10,52 @@ void inspector()
 {
     Engine_draw_rectangle_shape(0.0f, 0.0f, 300.0f, 700.0f, GRAY_COLOR);
     Engine_draw_text_better(font, "INSPECTOR", (Vector2){10.0f, 10.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 24.0f, 0.0f, WHITE);
+
+    if (selected_object_index >= 0 && selected_object_index < count) 
+    {
+        GameObject *obj = &all_objs[selected_object_index].data;
+
+        // imgui window
+        ImGui::SetNextWindowPos(ImVec2(10.0f, 45.0f));
+        ImVec2 contentSize = ImVec2(300.0f, 650.0f);
+        ImGui::SetNextWindowSize(contentSize);
+
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.35f, 0.35f, 0.35f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+        ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
+        
+        // Wyświetlanie nazwy wybranego obiektu
+        char buffer[128];
+        snprintf(buffer, sizeof(buffer), "Object: object_%d", selected_object_index + 1);
+        ImGui::Text("%s", buffer);
+        ImGui::Spacing();
+
+        ImGui::Text("Name");
+        ImGui::InputText("##ObjectName", obj->name, sizeof(obj->name));
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        
+        ImGui::Text("Position X");
+        ImGui::DragFloat("##PosX", &obj->transform.pos_x, 1.0f, -10000.0f, 10000.0f, "%.1f");
+
+        ImGui::Text("Position Y");
+        ImGui::DragFloat("##PosY", &obj->transform.pos_y, 1.0f, -10000.0f, 10000.0f, "%.1f");
+
+        ImGui::Spacing();
+        ImGui::Text("Width");
+        ImGui::DragFloat("##Width", &obj->transform.size_x, 1.0f, 1.0f, 5000.0f, "%.1f");
+
+        ImGui::Text("Height");
+        ImGui::DragFloat("##Height", &obj->transform.size_y, 1.0f, 1.0f, 5000.0f, "%.1f");
+
+        ImGui::PopStyleColor(4);
+
+        ImGui::End();
+    }
 }
 
 void file_manager()
@@ -115,7 +161,7 @@ void hierarchy()
         Engine_draw_rectangle_shape(itemRect.x, itemRect.y, itemRect.width, itemRect.height, rowColor);
 
         char name_buffer[64];
-        snprintf(name_buffer, sizeof(name_buffer), "object_%d", global_index + 1);
+        snprintf(name_buffer, sizeof(name_buffer), "%s", all_objs[global_index].data.name);
         Engine_draw_text_better(font, name_buffer, (Vector2){itemRect.x + 16.0f, itemRect.y + 2.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 12.0f, 0.0f, WHITE);
     }
 }

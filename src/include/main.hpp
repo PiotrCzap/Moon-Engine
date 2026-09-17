@@ -2,7 +2,6 @@
 
 #include "raylib.h"
 #include <stdio.h>
-#include <sys/resource.h>
 #include <string.h>
 #include "raygui.h"
 
@@ -12,6 +11,7 @@
 // =================================================================================================
 
 extern bool debug_mode;
+extern bool editor_mode;
 
 inline Image window_icon;
 extern int window_size_x;
@@ -74,6 +74,7 @@ void file_manager();
 void hierarchy();
 void viewport();
 void Engine_add_game_object(const Texture2D texture, const float pos_x, const float pos_y, const float size_x, const float size_y, const float rotation, const Color color, const bool visible);
+
 struct transform
 {
     float pos_x, pos_y;
@@ -105,7 +106,7 @@ struct GameObject
    struct text_renderer text_renderer;
 };
 
-extern int selected_object_index;
+extern int selected_object_index; // for class New_GameObject
 
 class New_GameObject
 {
@@ -120,14 +121,16 @@ public:
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r)) {
         selected_object_index = index; // Selecting Object in Inspector
 
-        if (!is_something_dragging) {
+        if (!is_something_dragging)
+        {
             data.isDragging = true;
             is_something_dragging = true;
         }
         }
 
         // Chwytamy obiekt tylko wtedy, gdy żaden inny nie jest przeciągany
-        if (!is_something_dragging && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r)) {
+        if (!is_something_dragging && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r))
+        {
             data.isDragging = true;
             is_something_dragging = true;
         }
