@@ -40,7 +40,6 @@ while (!WindowShouldClose())
         
                 Engine_debug_window();
                 Project_window();
-                hierarchy();
             
 
             rlImGuiEnd();
