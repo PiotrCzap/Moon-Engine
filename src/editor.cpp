@@ -130,15 +130,37 @@ void hierarchy()
     {
         // Ustawienie okna na środku ekranu za każdym razem, gdy się pojawia
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        ImGui::SetNextWindowSize(ImVec2(260.0f, 140.0f));
+        ImGui::SetNextWindowSize(ImVec2(255.0f, 110.0f));
+
+        // imgui styles
+
+        ImVec4 title_background_active_color = ImVec4(
+            DARK_GRAY_COLOR.r / 255.0f,
+            DARK_GRAY_COLOR.g / 255.0f,
+            DARK_GRAY_COLOR.b / 255.0f,
+            DARK_GRAY_COLOR.a / 255.0f
+        );
+        ImVec4 title_background_color = ImVec4(
+            GRAY_COLOR.r / 255.0f,
+            GRAY_COLOR.g / 255.0f,
+            GRAY_COLOR.b / 255.0f,
+            GRAY_COLOR.a / 255.0f
+        );
+
+        ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(title_background_color));
+        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(title_background_active_color));
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.35f, 0.35f, 0.35f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 
         // Tworzenie przesuwane okno ImGui z przyciskiem zamknięcia [X]
-        if (ImGui::Begin("Dodaj obiekty", &show_spawn_popup, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+        if (ImGui::Begin("ADD OBJECTS", &show_spawn_popup, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
         {
-            ImGui::Text("Liczba obiektow:");
+            ImGui::Text("Objects:");
             
             // Suwak / DragInt (przeciąganie myszką w lewo/prawo lub wpisanie liczby)
-            ImGui::DragInt("##spawn_drag", &spawn_amount, 0.5f, 1, 500, "%d szt.");
+            ImGui::DragInt("##spawn_drag", &spawn_amount, 0.5f, 1, 500, "%d amount.");
 
             ImGui::Spacing();
             ImGui::Spacing();
@@ -181,11 +203,12 @@ void hierarchy()
             ImGui::SameLine();
 
             // Przycisk Anuluj
-            if (ImGui::Button("Anuluj", ImVec2(110.0f, 25.0f)))
+            if (ImGui::Button("Cancel", ImVec2(110.0f, 25.0f)))
             {
                 show_spawn_popup = false; // Zamknij okno bez robienia niczego
             }
         }
+        ImGui::PopStyleColor(6);
         ImGui::End();
     }
 
