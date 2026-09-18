@@ -105,45 +105,90 @@ void hierarchy()
     GuiSetFont(font);
     
     // ==========================================
-    // ADD BUTTON AND OBJECT CREATEING
+    // ADD BUTTON AND OBJECT CREATING (Z OKIENKIEM IMGUI)
     // ==========================================
     static double last_click_time = 0.0;
-    
+    static bool show_spawn_popup = false;
+    static int spawn_amount = 1;
+
+    // Przycisk RayGui z plusem
     if (GuiButton((Rectangle){1660.0f, 40.0f, 25.0f, 25.0f}, "+")) 
     {
         double current_time = GetTime();
-        
         if (current_time - last_click_time > 0.10)
         {
             last_click_time = current_time;
-            
-            if (count < 1000) 
+            show_spawn_popup = true; // Otwieramy okienko ImGui po kliknięciu
+        }
+    }
+
+    // Okienko ImGui z DragInt i przyciskiem OK
+    if (show_spawn_popup)
+    {
+        // Ustawienie pozycji i stałego rozmiaru okienka
+        ImGui::SetNextWindowPos(ImVec2(1660.0f, 75.0f), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(220.0f, 110.0f));
+
+        // Stylizacja okienka ImGui w ciemnych barwach (spójna z Inspectorem)
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.12f, 0.12f, 0.12f, 0.95f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.18f, 0.18f, 0.18f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.35f, 0.35f, 0.35f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.22f, 0.22f, 0.22f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.32f, 0.32f, 0.32f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+        if (ImGui::Begin("Dodaj obiekty", &show_spawn_popup, ImGuiWindowFlags_NoResize))
+        {
+            ImGui::Text("Liczba obiektow:");
+            ImGui::DragInt("##spawn_amount", &spawn_amount, 0.5f, 1, 100, "%d szt.");
+
+            ImGui::Spacing();
+
+            if (ImGui::Button("OK", ImVec2(95.0f, 25.0f)))
             {
-                int objects_per_row = 5;
-                float spacing = 110.0f;
-                
-                int row = count / objects_per_row;
-                int col = count % objects_per_row;
+                // Pętla tworząca wybraną liczbę obiektów
+                for (int k = 0; k < spawn_amount; k++)
+                {
+                    if (count < 1000) 
+                    {
+                        int objects_per_row = 5;
+                        float spacing = 110.0f;
+                        
+                        int row = count / objects_per_row;
+                        int col = count % objects_per_row;
 
-                float start_spawn_x = 0.0f; 
-                float start_spawn_y = 0.0f; 
+                        float start_spawn_x = 0.0f; 
+                        float start_spawn_y = 0.0f; 
 
-                float pos_x = start_spawn_x + (col * spacing);
-                float pos_y = start_spawn_y + (row * spacing);
-                
-                // Creates object
-                all_objs[count].data = (GameObject){
-                    "object_", 
-                    false, 
-                    {pos_x, pos_y, 100.0f, 100.0f, 0.0f}, 
-                    {null_txt, WHITE, 1}, 
-                    {0}
-                };
-                
-                snprintf(all_objs[count].data.name, sizeof(all_objs[count].data.name), "object_%d", count + 1);
-                count++;
+                        float pos_x = start_spawn_x + (col * spacing);
+                        float pos_y = start_spawn_y + (row * spacing);
+                        
+                        all_objs[count].data = (GameObject){
+                            "object_", 
+                            false, 
+                            {pos_x, pos_y, 100.0f, 100.0f, 0.0f}, 
+                            {null_txt, WHITE, 1}, 
+                            {0}
+                        };
+                        
+                        snprintf(all_objs[count].data.name, sizeof(all_objs[count].data.name), "object_%d", count + 1);
+                        count++;
+                    }
+                }
+                show_spawn_popup = false; // Zamknij okienko po zatwierdzeniu
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Anuluj", ImVec2(95.0f, 25.0f)))
+            {
+                show_spawn_popup = false;
             }
         }
+        ImGui::End();
+        ImGui::PopStyleColor(8); // Zdejmujemy 8 stylów pushniętych wyżej
     }
 
     // ===========================================
