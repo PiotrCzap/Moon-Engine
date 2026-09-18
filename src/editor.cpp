@@ -3,6 +3,7 @@
 #include "imgui/rlImGui.h"
 New_GameObject all_objs[1000];
 int count = 0;
+const int max_count = 1000;
 
 bool show_object = false;
 
@@ -105,10 +106,12 @@ void hierarchy()
     GuiSetFont(font);
     
     // ==========================================
-    // ADD BUTTON AND OBJECT CREATEING
+    // ADD BUTTON AND POPUP CONTROL
     // ==========================================
     static double last_click_time = 0.0;
-    
+    static bool show_spawn_popup = false;  // Steruje widocznością okna ImGui
+    static int spawn_amount = 1;           // Liczba obiektów do stworzenia
+
     if (GuiButton((Rectangle){1660.0f, 40.0f, 25.0f, 25.0f}, "+")) 
     {
         double current_time = GetTime();
@@ -116,34 +119,74 @@ void hierarchy()
         if (current_time - last_click_time > 0.10)
         {
             last_click_time = current_time;
+            show_spawn_popup = true; // Otwiera okienko po kliknięciu "+"
+        }
+    }
+
+    // ==========================================
+    // IMGUI POPUP WINDOW (NA ŚRODKU)
+    // ==========================================
+    if (show_spawn_popup)
+    {
+        // Ustawienie okna na środku ekranu za każdym razem, gdy się pojawia
+        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize(ImVec2(260.0f, 140.0f));
+
+        // Tworzenie przesuwane okno ImGui z przyciskiem zamknięcia [X]
+        if (ImGui::Begin("Dodaj obiekty", &show_spawn_popup, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+        {
+            ImGui::Text("Liczba obiektow:");
             
-            if (count < 1000) 
+            // Suwak / DragInt (przeciąganie myszką w lewo/prawo lub wpisanie liczby)
+            ImGui::DragInt("##spawn_drag", &spawn_amount, 0.5f, 1, 500, "%d szt.");
+
+            ImGui::Spacing();
+            ImGui::Spacing();
+
+            // Przycisk Create (Tworzenie obiektów)
+            if (ImGui::Button("Create", ImVec2(110.0f, 25.0f)))
             {
-                int objects_per_row = 5;
-                float spacing = 110.0f;
-                
-                int row = count / objects_per_row;
-                int col = count % objects_per_row;
+                for (int k = 0; k < spawn_amount; k++)
+                {
+                    if (count < max_count) 
+                    {
+                        int objects_per_row = 5;
+                        float spacing = 110.0f;
+                        
+                        int row = count / objects_per_row;
+                        int col = count % objects_per_row;
 
-                float start_spawn_x = 0.0f; 
-                float start_spawn_y = 0.0f; 
+                        float start_spawn_x = 0.0f; 
+                        float start_spawn_y = 0.0f; 
 
-                float pos_x = start_spawn_x + (col * spacing);
-                float pos_y = start_spawn_y + (row * spacing);
-                
-                // Creates object
-                all_objs[count].data = (GameObject){
-                    "object_", 
-                    false, 
-                    {pos_x, pos_y, 100.0f, 100.0f, 0.0f}, 
-                    {null_txt, WHITE, 1}, 
-                    {0}
-                };
-                
-                snprintf(all_objs[count].data.name, sizeof(all_objs[count].data.name), "object_%d", count + 1);
-                count++;
+                        float pos_x = start_spawn_x + (col * spacing);
+                        float pos_y = start_spawn_y + (row * spacing);
+                        
+                        // Creates object
+                        all_objs[count].data = (GameObject){
+                            "object_", 
+                            false, 
+                            {pos_x, pos_y, 100.0f, 100.0f, 0.0f}, 
+                            {null_txt, WHITE, 1}, 
+                            {0}
+                        };
+                        
+                        snprintf(all_objs[count].data.name, sizeof(all_objs[count].data.name), "object_%d", count + 1);
+                        count++;
+                    }
+                }
+                show_spawn_popup = false; // Zamknij okno po stworzeniu
+            }
+
+            ImGui::SameLine();
+
+            // Przycisk Anuluj
+            if (ImGui::Button("Anuluj", ImVec2(110.0f, 25.0f)))
+            {
+                show_spawn_popup = false; // Zamknij okno bez robienia niczego
             }
         }
+        ImGui::End();
     }
 
     // ===========================================
