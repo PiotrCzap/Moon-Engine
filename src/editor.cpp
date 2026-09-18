@@ -105,44 +105,78 @@ void hierarchy()
     GuiSetFont(font);
     
     // ==========================================
-    // ADD BUTTON AND OBJECT CREATEING
+    // ADD BUTTON AND OBJECT CREATING (CZYSTE RAYGUI)
     // ==========================================
     static double last_click_time = 0.0;
+    static bool show_spawn_popup = false;
+    static int spawn_amount = 1;
     
     if (GuiButton((Rectangle){1660.0f, 40.0f, 25.0f, 25.0f}, "+")) 
     {
         double current_time = GetTime();
-        
         if (current_time - last_click_time > 0.10)
         {
             last_click_time = current_time;
-            
-            if (count < 1000) 
+            show_spawn_popup = true; 
+        }
+    }
+
+    // ==========================================
+    // OKIENKO POPUP W 100% OPARTY NA RAYGUI (Na środku ekranu)
+    // ==========================================
+    if (show_spawn_popup)
+    {
+        float screenWidth = (float)GetScreenWidth();
+        float screenHeight = (float)GetScreenHeight();
+        
+        Rectangle windowRect = { screenWidth / 2.0f - 125.0f, screenHeight / 2.0f - 60.0f, 250.0f, 120.0f };
+
+        // GuiWindowBox zwraca 0, jeśli kliknięto 'X' zamykający okno
+        int windowResult = GuiWindowBox(windowRect, "Dodaj obiekty");
+        if (windowResult == 0) 
+        {
+            show_spawn_popup = false; 
+        }
+
+        // Tekst opisowy za pomocą Twojej bezpiecznej funkcji tekstowej
+        Engine_draw_text_better(font, "Liczba obiektow:", (Vector2){ windowRect.x + 15.0f, windowRect.y + 35.0f }, (Vector2){0.0f, 0.0f}, 0.0f, 12.0f, 0.0f, WHITE);
+
+        // Pole wartości (ValueBox) do wpisywania/edycji liczby obiektów
+        static bool value_box_edit_mode = false;
+        if (GuiValueBox((Rectangle){ windowRect.x + 15.0f, windowRect.y + 55.0f, 110.0f, 25.0f }, NULL, &spawn_amount, 1, 100, value_box_edit_mode))
+        {
+            value_box_edit_mode = !value_box_edit_mode;
+        }
+
+        // Przycisk OK zatwierdzający dodawanie
+        if (GuiButton((Rectangle){ windowRect.x + 135.0f, windowRect.y + 55.0f, 100.0f, 25.0f }, "OK"))
+        {
+            for (int k = 0; k < spawn_amount; k++)
             {
-                int objects_per_row = 5;
-                float spacing = 110.0f;
-                
-                int row = count / objects_per_row;
-                int col = count % objects_per_row;
+                if (count < 1000) 
+                {
+                    int objects_per_row = 5;
+                    float spacing = 110.0f;
+                    
+                    int row = count / objects_per_row;
+                    int col = count % objects_per_row;
 
-                float start_spawn_x = 0.0f; 
-                float start_spawn_y = 0.0f; 
-
-                float pos_x = start_spawn_x + (col * spacing);
-                float pos_y = start_spawn_y + (row * spacing);
-                
-                // Creates object
-                all_objs[count].data = (GameObject){
-                    "object_", 
-                    false, 
-                    {pos_x, pos_y, 100.0f, 100.0f, 0.0f}, 
-                    {null_txt, WHITE, 1}, 
-                    {0}
-                };
-                
-                snprintf(all_objs[count].data.name, sizeof(all_objs[count].data.name), "object_%d", count + 1);
-                count++;
+                    float pos_x = 0.0f + (col * spacing);
+                    float pos_y = 0.0f + (row * spacing);
+                    
+                    all_objs[count].data = (GameObject){
+                        "object_", 
+                        false, 
+                        {pos_x, pos_y, 100.0f, 100.0f, 0.0f}, 
+                        {null_txt, WHITE, 1}, 
+                        {0}
+                    };
+                    
+                    snprintf(all_objs[count].data.name, sizeof(all_objs[count].data.name), "object_%d", count + 1);
+                    count++;
+                }
             }
+            show_spawn_popup = false; 
         }
     }
 
