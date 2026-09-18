@@ -9,6 +9,7 @@ bool show_object = false;
 void inspector()
 {
     Engine_draw_rectangle_shape(0.0f, 0.0f, 300.0f, 700.0f, GRAY_COLOR);
+    Engine_draw_rectangle_shape(298.0f, 0.0f, 2.0f, 700.0f, BLACK_COLOR);
     Engine_draw_text_better(font, "INSPECTOR", (Vector2){10.0f, 10.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 24.0f, 0.0f, WHITE);
 
     if (selected_object_index >= 0 && selected_object_index < count) 
@@ -21,7 +22,6 @@ void inspector()
         ImGui::SetNextWindowSize(contentSize);
         
         // imgui styles
-
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.35f, 0.35f, 0.35f, 1.0f));
@@ -30,15 +30,9 @@ void inspector()
         ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
         
         // object name
-        char buffer[128];
-        snprintf(buffer, sizeof(buffer), "Object: object_%d", selected_object_index + 1);
-        ImGui::Text("%s", buffer);
-        ImGui::Spacing();
-
         ImGui::Text("Name");
         ImGui::InputText("##ObjectName", obj->name, sizeof(obj->name));
         ImGui::Spacing();
-        ImGui::Separator();
         ImGui::Spacing();
         
         // object position x
@@ -51,12 +45,32 @@ void inspector()
 
         // object size x
         ImGui::Spacing();
-        ImGui::Text("Width");
-        ImGui::DragFloat("##Width", &obj->transform.size_x, 1.0f, 1.0f, 5000.0f, "%.1f");
+        ImGui::Text("Size y");
+        ImGui::DragFloat("##size_x", &obj->transform.size_x, 1.0f, 1.0f, 5000.0f, "%.1f");
 
         // object size y
-        ImGui::Text("Height");
-        ImGui::DragFloat("##Height", &obj->transform.size_y, 1.0f, 1.0f, 5000.0f, "%.1f");
+        ImGui::Text("Size x");
+        ImGui::DragFloat("##size_y", &obj->transform.size_y, 1.0f, 1.0f, 5000.0f, "%.1f");
+
+        // color
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Text("Color");
+
+        float col[4] = {
+            obj->sprite_renderer.color.r / 255.0f,
+            obj->sprite_renderer.color.g / 255.0f,
+            obj->sprite_renderer.color.b / 255.0f,
+            obj->sprite_renderer.color.a / 255.0f
+        };
+
+        if (ImGui::ColorEdit4("##ColorPicker", col, ImGuiColorEditFlags_NoInputs))
+        {
+            obj->sprite_renderer.color.r = (unsigned char)(col[0] * 255.0f);
+            obj->sprite_renderer.color.g = (unsigned char)(col[1] * 255.0f);
+            obj->sprite_renderer.color.b = (unsigned char)(col[2] * 255.0f);
+            obj->sprite_renderer.color.a = (unsigned char)(col[3] * 255.0f);
+        }
 
         ImGui::PopStyleColor(4);
 
@@ -67,12 +81,14 @@ void inspector()
 void file_manager()
 {
     Engine_draw_rectangle_shape(0.0f, 700.0f, 1920.0f, 700.0f, DARK_GRAY_COLOR);
+    Engine_draw_rectangle_shape(0.0f, 700.0f, 1920.0f, 2.0f, BLACK_COLOR);
     Engine_draw_text_better(font, "FILE MANAGER", (Vector2){10.0f, 710.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 24.0f, 0.0f, WHITE);
 }
 
 void hierarchy()
 {
     Engine_draw_rectangle_shape(1650.0f, 0.0f, 300.0f, 700.0f, GRAY_COLOR);
+    Engine_draw_rectangle_shape(1650.0f, 0.0f, 2.0f, 700.0f, BLACK_COLOR);
     Engine_draw_text_better(font, "HIERARCHY", (Vector2){1660.0f, 10.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 24.0f, 0.0f, WHITE);
     
     // styles
@@ -109,8 +125,8 @@ void hierarchy()
                 int row = count / objects_per_row;
                 int col = count % objects_per_row;
 
-                float start_spawn_x = 800.0f; 
-                float start_spawn_y = 300.0f; 
+                float start_spawn_x = 0.0f; 
+                float start_spawn_y = 0.0f; 
 
                 float pos_x = start_spawn_x + (col * spacing);
                 float pos_y = start_spawn_y + (row * spacing);
@@ -178,9 +194,12 @@ void hierarchy()
                     all_objs[dragged_index] = all_objs[global_index];
                     all_objs[global_index] = temp;
 
-                    if (selected_object_index == dragged_index) {
+                    if (selected_object_index == dragged_index)
+                    {
                         selected_object_index = global_index;
-                    } else if (selected_object_index == global_index) {
+                    } 
+                    else if (selected_object_index == global_index)
+                    {
                         selected_object_index = dragged_index;
                     }
                     break;
@@ -214,20 +233,28 @@ void hierarchy()
         if (dragged_index != -1 && hovered)
         {
             drop_indicator_index = global_index;
-            if (mousePos.y > (current_y + item_height / 2.0f)) {
+            if (mousePos.y > (current_y + item_height / 2.0f))
+            {
                 insert_below = true;
-            } else {
+            } 
+            else
+            {
                 insert_below = false;
             }
         }
 
         // colored rows
         Color rowColor;
-        if (dragged_index == global_index) {
+        if (dragged_index == global_index)
+        {
             rowColor = (Color){ 70, 70, 90, 150 };
-        } else if (hovered) {
+        }
+        else if (hovered)
+        {
             rowColor = (Color){ 60, 60, 60, 255 };
-        } else {
+        }
+        else
+        {
             rowColor = (Color){ 42, 42, 42, 255 };
         }
 
@@ -268,12 +295,67 @@ void hierarchy()
 
 void viewport()
 {
-    Engine_draw_rectangle_shape(300.0f, 0.0f, 1350.0f, 700.0f, BLACK_COLOR);
-    Engine_draw_text_better(font, "VIEWPORT", (Vector2){310.0f, 10.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 24.0f, 0.0f, WHITE);
+    Color viewprot_color = { 55u, 55u, 55u, 255u };
+    Color viewprot_color_header = { 33u, 33u, 33u, 255u };
+
+    Engine_draw_rectangle_shape(300.0f, 0.0f, 1350.0f, 700.0f, viewprot_color);
+    Engine_draw_rectangle_shape(300.0f, 0.0f, 1350.0f, 35.0f, viewprot_color_header);
+    Engine_draw_text_better(font, "VIEWPORT", (Vector2){310.0f, 8.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 20.0f, 0.0f, WHITE);
+
+    static Vector2 camera_target = { 0.0f, 0.0f }; // camera pos
+    static float camera_zoom = 1.0f;
+    static bool is_camera_panning = false;
+    static Vector2 last_mouse_pos = { 0.0f, 0.0f };
+
+    Rectangle viewportRect = {300.0f, 35.0f, 1350.0f, 665.0f};
+    Vector2 screenMousePos = GetMousePosition();
+
+    if (CheckCollisionPointRec(screenMousePos, viewportRect))
+    {
+        // scroll zoom
+        float wheel = GetMouseWheelMove();
+        if (wheel != 0)
+        {
+            float zoom_increment = 0.1f * camera_zoom;
+            if (wheel > 0) camera_zoom += zoom_increment;
+            else camera_zoom -= zoom_increment;
+
+            if (camera_zoom < 0.1f) camera_zoom = 0.1f;
+            if (camera_zoom > 10.0f) camera_zoom = 10.0f;
+        }
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_MIDDLE))
+        {
+            is_camera_panning = true;
+            last_mouse_pos = screenMousePos;
+        }
+    }
+
+    if (IsMouseButtonReleased(MOUSE_BUTTON_MIDDLE))
+    {
+        is_camera_panning = false;
+    }
+
+    // smooth camera move
+    if (is_camera_panning)
+    {
+        Vector2 mouseDelta = { screenMousePos.x - last_mouse_pos.x, screenMousePos.y - last_mouse_pos.y };
+        camera_target.x -= mouseDelta.x / camera_zoom;
+        camera_target.y -= mouseDelta.y / camera_zoom;
+        last_mouse_pos = screenMousePos;
+    }
+
+    // ==========================================
+    // CAMERA CONFIG
+    // ==========================================
+    Camera2D camera = {0};
+    camera.offset = (Vector2){300.0f + (1350.0f / 2.0f), 35.0f + (665.0f / 2.0f)}; 
+    camera.target = camera_target;
+    camera.rotation = 0.0f;
+    camera.zoom = camera_zoom;
 
     bool is_something_dragging = false;
 
-    // object dragging
     for (int i = 0; i < count; i++)
     {
         if (all_objs[i].data.isDragging)
@@ -283,9 +365,51 @@ void viewport()
         }
     }
 
-    for (int i = count - 1; i >= 0; i--)
+    for (int i = 0; i < count; i++)
     {
-        all_objs[i].Update(is_something_dragging, i);
-        all_objs[i].Draw(debug_mode);
+        all_objs[i].Update(is_something_dragging, i, camera);
     }
+
+    BeginScissorMode(300, 35, 1350, 665);
+    {
+        BeginMode2D(camera);
+        {
+            // ==========================================
+            // GRID & AXIS X & Y
+            // ==========================================
+            float step = 100.0f;
+            float draw_distance = 3000.0f / camera_zoom;
+            
+            float start_x = camera_target.x - draw_distance;
+            float end_x = camera_target.x + draw_distance;
+            float start_y = camera_target.y - draw_distance;
+            float end_y = camera_target.y + draw_distance;
+
+            float aligned_start_x = (float)((int)(start_x / step)) * step;
+            float aligned_start_y = (float)((int)(start_y / step)) * step;
+
+            // grid drawing
+            for (float x = aligned_start_x; x <= end_x; x += step)
+            {
+                if (x != 0.0f)
+                    DrawLineEx((Vector2){x, start_y}, (Vector2){x, end_y}, 1.0f / camera_zoom, (Color){65, 65, 65, 255});
+            }
+            for (float y = aligned_start_y; y <= end_y; y += step)
+            {
+                if (y != 0.0f)
+                    DrawLineEx((Vector2){start_x, y}, (Vector2){end_x, y}, 1.0f / camera_zoom, (Color){65, 65, 65, 255});
+            }
+
+            DrawLineEx((Vector2){start_x, 0.0f}, (Vector2){end_x, 0.0f}, 1.5f / camera_zoom, RED);   // axis x
+            DrawLineEx((Vector2){0.0f, start_y}, (Vector2){0.0f, end_y}, 1.5f / camera_zoom, GREEN); // axis y
+
+            // object drawing
+            for (int i = count - 1; i >= 0; i--)
+            {
+                all_objs[i].Draw(debug_mode);
+            }
+        }
+        EndMode2D();
+    }
+    EndScissorMode();
 }

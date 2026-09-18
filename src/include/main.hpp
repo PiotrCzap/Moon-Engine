@@ -113,14 +113,17 @@ class New_GameObject
 public:
     GameObject data;
 
-    // update functions (obsługuje przeciąganie myszką i granice viewportu)
-    void Update(bool& is_something_dragging, int index) 
+    // Dodajemy 'Camera2D camera' jako argument, żeby wiedzieć, gdzie patrzy świat
+    void Update(bool& is_something_dragging, int index, Camera2D camera) 
     {
+        // 1. Przeliczamy mysz ze ekranu na świat gry
+        Vector2 worldMouse = GetScreenToWorld2D(GetMousePosition(), camera);
         Rectangle r = { data.transform.pos_x, data.transform.pos_y, data.transform.size_x, data.transform.size_y };
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r))
+        // 2. Sprawdzamy kolizję z uwzględnieniem świata, a nie ekranu!
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(worldMouse, r))
         {
-            selected_object_index = index; // Selecting Object in Inspector
+            selected_object_index = index; 
 
             if (!is_something_dragging)
             {
@@ -129,25 +132,13 @@ public:
             }
         }
 
-        // Chwytamy obiekt tylko wtedy, gdy żaden inny nie jest przeciągany
-        if (!is_something_dragging && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r))
-        {
-            data.isDragging = true;
-            is_something_dragging = true;
-        }
-
         // Object dragging
         if (data.isDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
-            Vector2 d = GetMouseDelta();
+            // Przesuwanie uwzględniające zoom kamery
+            Vector2 d = { GetMouseDelta().x / camera.zoom, GetMouseDelta().y / camera.zoom };
             data.transform.pos_x += d.x;
             data.transform.pos_y += d.y;
-
-            // Opcjonalne: blokada granic Viewportu (300 do 1650, 0 do 700)
-            if (data.transform.pos_x < 300.0f) data.transform.pos_x = 300.0f;
-            if (data.transform.pos_x > 1650.0f - data.transform.size_x) data.transform.pos_x = 1650.0f - data.transform.size_x;
-            if (data.transform.pos_y < 0.0f) data.transform.pos_y = 0.0f;
-            if (data.transform.pos_y > 700.0f - data.transform.size_y) data.transform.pos_y = 700.0f - data.transform.size_y;
         }
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
@@ -155,11 +146,9 @@ public:
             data.isDragging = false;
         }
     }
-
     
     void Draw(bool debug_mode) 
     {
-        // draws red outline on object
         if (debug_mode)
         {
             Rectangle debugRec = { 
@@ -171,7 +160,6 @@ public:
             DrawRectangleLinesEx(debugRec, 2.0f, RED);
         }
 
-        // draws texture on object
         Engine_draw_rectangle_shape_with_texture(
             data.sprite_renderer.texture,
             data.transform.pos_x, data.transform.pos_y,
