@@ -194,6 +194,7 @@ void hierarchy()
                         obj.isDragging = false;
                         obj.transform = {pos_x, pos_y, 100.0f, 100.0f, 0.0f};
                         obj.sprite_renderer = {null_txt, WHITE, 1};
+                        obj.category_id = 0;
 
                         
                         snprintf(all_objs[count].data.name, sizeof(all_objs[count].data.name), "object_%d", count + 1);
@@ -214,153 +215,21 @@ void hierarchy()
         ImGui::PopStyleColor(9);
         ImGui::End();
     }
-
-    // ===========================================
-    // STRONICOWANIE and SCROLLING
-    // ==========================================
-    static int page_offset = 0;
-    const int items_per_page = 34;
-    const float start_y = 80.0f; 
-    float item_height = 16.0f;
-
-    static int dragged_index = -1; 
-
-    Rectangle panelRect = {1650.0f, 0.0f, 300.0f, 700.0f};
-    Vector2 mousePos = GetMousePosition();
-    
-    if (CheckCollisionPointRec(mousePos, panelRect))
+    if (ImGui::TreeNode("Kategoria: Ogólne"))
     {
-        const float wheel = GetMouseWheelMove();
-        if (wheel != 0)
+        // Lecimy pętlą po wszystkich stworzonych obiektach
+        for (int i = 0; i < count; i++)
         {
-            page_offset -= (int)wheel * items_per_page;
-            if (page_offset < 0) page_offset = 0;
-            if (page_offset >= count && count > 0)
+            // Wyświetlamy tylko te, które mają category_id == 0
+            if (all_objs[i].data.category_id == 0)
             {
-                page_offset = ((count - 1) / items_per_page) * items_per_page;
+                ImGui::Text("%s", all_objs[i].data.name);
             }
         }
+        ImGui::TreePop();
     }
 
-    // ==========================================
-    // DRAG & DROP
-    // ==========================================
-    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-    {
-        if (dragged_index != -1)
-        {
-            for (int i = 0; i < items_per_page; i++)
-            {
-                int global_index = page_offset + i;
-                if (global_index >= count) break;
-                
-                float current_y = start_y + (i * (item_height + 2.0f));
-                Rectangle targetRect = {1660.0f, current_y, 280.0f, item_height};
-                
-                if (CheckCollisionPointRec(mousePos, targetRect) && dragged_index != global_index)
-                {
-                    New_GameObject temp = all_objs[dragged_index];
-                    all_objs[dragged_index] = all_objs[global_index];
-                    all_objs[global_index] = temp;
-
-                    if (selected_object_index == dragged_index)
-                    {
-                        selected_object_index = global_index;
-                    } 
-                    else if (selected_object_index == global_index)
-                    {
-                        selected_object_index = dragged_index;
-                    }
-                    break;
-                }
-            }
-            dragged_index = -1;
-        }
-    }
-
-    // ==========================================
-    // hierarchy rows
-    // ==========================================
-    int drop_indicator_index = -1;
-    bool insert_below = false;
-
-    for (int i = 0; i < items_per_page; i++)
-    {
-        int global_index = page_offset + i;
-        if (global_index >= count) break; 
-
-        float current_y = start_y + (i * (item_height + 2.0f));
-        Rectangle itemRect = {1660.0f, current_y, 280.0f, item_height};
-        bool hovered = CheckCollisionPointRec(mousePos, itemRect);
-
-        if (hovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-        {
-            selected_object_index = global_index;
-            dragged_index = global_index; 
-        }
-
-        if (dragged_index != -1 && hovered)
-        {
-            drop_indicator_index = global_index;
-            if (mousePos.y > (current_y + item_height / 2.0f))
-            {
-                insert_below = true;
-            } 
-            else
-            {
-                insert_below = false;
-            }
-        }
-
-        // colored rows
-        Color rowColor;
-        if (dragged_index == global_index)
-        {
-            rowColor = (Color){ 70, 70, 90, 150 };
-        }
-        else if (hovered)
-        {
-            rowColor = (Color){ 60, 60, 60, 255 };
-        }
-        else
-        {
-            rowColor = (Color){ 42, 42, 42, 255 };
-        }
-
-        Engine_draw_rectangle_shape(itemRect.x, itemRect.y, itemRect.width, itemRect.height, rowColor);
-
-        char name_buffer[128];
-        snprintf(name_buffer, sizeof(name_buffer), "%s", all_objs[global_index].data.name);
-        Engine_draw_text_better(font, name_buffer, (Vector2){itemRect.x + 16.0f, itemRect.y + 2.0f}, (Vector2){0.0f, 0.0f}, 0.0f, 12.0f, 0.0f, WHITE);
-    }
-
-    // ==========================================
-    // VISUALIZATION (drag line and floating name)
-    // ==========================================
-    if (dragged_index != -1)
-    {
-        if (drop_indicator_index != -1)
-        {
-            int relative_i = drop_indicator_index - page_offset;
-            if (relative_i >= 0 && relative_i < items_per_page)
-            {
-                float line_y = start_y + (relative_i * (item_height + 2.0f));
-                if (insert_below) {
-                    line_y += item_height + 2.0f;
-                }
-                Engine_draw_rectangle_shape(1660.0f, line_y - 1.0f, 280.0f, 2.0f, (Color){ 0, 160, 255, 255 });
-            }
-        }
-
-        // draws floating name near mouse
-        char drag_name[128];
-
-        snprintf(drag_name, sizeof(drag_name), "%s", all_objs[dragged_index].data.name);  
-        Vector2 cursor_pos = { mousePos.x + 15.0f, mousePos.y + 10.0f };
-        Engine_draw_rectangle_shape(cursor_pos.x - 4.0f, cursor_pos.y - 2.0f, 100.0f, 18.0f, (Color){ 30, 30, 30, 200 });
-        Engine_draw_text_better(font, drag_name, cursor_pos, (Vector2){0.0f, 0.0f}, 0.0f, 12.0f, 0.0f, WHITE);
-        
-    }
+   
 }
 
 void viewport()
