@@ -45,7 +45,6 @@ void inspector()
         ImGui::DragFloat("##PosY", &obj->transform.pos_y, 1.0f, -10000.0f, 10000.0f, "%.1f");
 
         // object size x
-        ImGui::Spacing();
         ImGui::Text("Size y");
         ImGui::DragFloat("##size_x", &obj->transform.size_x, 1.0f, 1.0f, 5000.0f, "%.1f");
 
@@ -109,7 +108,7 @@ void hierarchy()
     // ADD BUTTON AND POPUP CONTROL
     // ==========================================
     static double last_click_time = 0.0;
-    static bool show_spawn_popup = false;  // Steruje widocznością okna ImGui
+    static bool show_popup = false;  // Steruje widocznością okna ImGui
     static int spawn_amount = 1;           // Liczba obiektów do stworzenia
 
     if (GuiButton((Rectangle){1660.0f, 40.0f, 25.0f, 25.0f}, "+")) 
@@ -119,56 +118,61 @@ void hierarchy()
         if (current_time - last_click_time > 0.10)
         {
             last_click_time = current_time;
-            show_spawn_popup = true; // Otwiera okienko po kliknięciu "+"
+            show_popup = true; // Otwiera okienko po kliknięciu "+"
         }
     }
 
     // ==========================================
-    // IMGUI POPUP WINDOW (NA ŚRODKU)
+    // IMGUI POPUP WINDOW
     // ==========================================
-    if (show_spawn_popup)
+    if (show_popup)
     {
-        // Ustawienie okna na środku ekranu za każdym razem, gdy się pojawia
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        ImGui::SetNextWindowSize(ImVec2(255.0f, 110.0f));
+        ImGui::SetNextWindowSize(ImVec2(230.0f, 110.0f));
 
         // imgui styles
-
-        ImVec4 title_background_active_color = ImVec4(
+        ImVec4 dark_gray_color = ImVec4(
             DARK_GRAY_COLOR.r / 255.0f,
             DARK_GRAY_COLOR.g / 255.0f,
             DARK_GRAY_COLOR.b / 255.0f,
             DARK_GRAY_COLOR.a / 255.0f
         );
-        ImVec4 title_background_color = ImVec4(
+        ImVec4 gray_color = ImVec4(
             GRAY_COLOR.r / 255.0f,
             GRAY_COLOR.g / 255.0f,
             GRAY_COLOR.b / 255.0f,
             GRAY_COLOR.a / 255.0f
         );
+        ImVec4 darker_gray_color = ImVec4(
+            DARKER_GRAY_COLOR.r / 255.0f,
+            DARKER_GRAY_COLOR.g / 255.0f,
+            DARKER_GRAY_COLOR.b / 255.0f,
+            DARKER_GRAY_COLOR.a / 255.0f
+        );
 
-        ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(title_background_color));
-        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(title_background_active_color));
+        ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(dark_gray_color));
+        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(gray_color));
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.35f, 0.35f, 0.35f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(gray_color));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(dark_gray_color));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(darker_gray_color));
 
-        // Tworzenie przesuwane okno ImGui z przyciskiem zamknięcia [X]
-        if (ImGui::Begin("ADD OBJECTS", &show_spawn_popup, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+        if (ImGui::Begin("ADD OBJECTS", &show_popup, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
         {
             ImGui::Text("Objects:");
             
-            // Suwak / DragInt (przeciąganie myszką w lewo/prawo lub wpisanie liczby)
             ImGui::DragInt("##spawn_drag", &spawn_amount, 0.5f, 1, 500, "%d amount.");
 
             ImGui::Spacing();
             ImGui::Spacing();
 
-            // Przycisk Create (Tworzenie obiektów)
-            if (ImGui::Button("Create", ImVec2(110.0f, 25.0f)))
+            // create button
+            if (ImGui::Button("Create", ImVec2(100.0f, 25.0f)))
             {
-                for (int k = 0; k < spawn_amount; k++)
+                for (int i = 0; i < spawn_amount; i++)
                 {
                     if (count < max_count) 
                     {
@@ -178,37 +182,36 @@ void hierarchy()
                         int row = count / objects_per_row;
                         int col = count % objects_per_row;
 
-                        float start_spawn_x = 0.0f; 
-                        float start_spawn_y = 0.0f; 
+                        float start_spawn_x = 0.0f; // starting spawn position x
+                        float start_spawn_y = 0.0f; // starting spawn position y
 
                         float pos_x = start_spawn_x + (col * spacing);
                         float pos_y = start_spawn_y + (row * spacing);
                         
                         // Creates object
-                        all_objs[count].data = (GameObject){
-                            "object_", 
-                            false, 
-                            {pos_x, pos_y, 100.0f, 100.0f, 0.0f}, 
-                            {null_txt, WHITE, 1}, 
-                            {0}
-                        };
+                        GameObject& obj = all_objs[count].data;
+                        obj.name[0] = '\0';
+                        obj.isDragging = false;
+                        obj.transform = {pos_x, pos_y, 100.0f, 100.0f, 0.0f};
+                        obj.sprite_renderer = {null_txt, WHITE, 1};
+
                         
                         snprintf(all_objs[count].data.name, sizeof(all_objs[count].data.name), "object_%d", count + 1);
                         count++;
                     }
                 }
-                show_spawn_popup = false; // Zamknij okno po stworzeniu
+                show_popup = false;
             }
 
             ImGui::SameLine();
 
-            // Przycisk Anuluj
-            if (ImGui::Button("Cancel", ImVec2(110.0f, 25.0f)))
+            // cancel button
+            if (ImGui::Button("Cancel", ImVec2(100.0f, 25.0f)))
             {
-                show_spawn_popup = false; // Zamknij okno bez robienia niczego
+                show_popup = false;
             }
         }
-        ImGui::PopStyleColor(6);
+        ImGui::PopStyleColor(9);
         ImGui::End();
     }
 
@@ -227,7 +230,7 @@ void hierarchy()
     
     if (CheckCollisionPointRec(mousePos, panelRect))
     {
-        float wheel = GetMouseWheelMove();
+        const float wheel = GetMouseWheelMove();
         if (wheel != 0)
         {
             page_offset -= (int)wheel * items_per_page;
@@ -251,8 +254,8 @@ void hierarchy()
                 int global_index = page_offset + i;
                 if (global_index >= count) break;
                 
-                float c_y = start_y + (i * (item_height + 2.0f));
-                Rectangle targetRect = {1660.0f, c_y, 280.0f, item_height};
+                float current_y = start_y + (i * (item_height + 2.0f));
+                Rectangle targetRect = {1660.0f, current_y, 280.0f, item_height};
                 
                 if (CheckCollisionPointRec(mousePos, targetRect) && dragged_index != global_index)
                 {
@@ -356,6 +359,7 @@ void hierarchy()
         Vector2 cursor_pos = { mousePos.x + 15.0f, mousePos.y + 10.0f };
         Engine_draw_rectangle_shape(cursor_pos.x - 4.0f, cursor_pos.y - 2.0f, 100.0f, 18.0f, (Color){ 30, 30, 30, 200 });
         Engine_draw_text_better(font, drag_name, cursor_pos, (Vector2){0.0f, 0.0f}, 0.0f, 12.0f, 0.0f, WHITE);
+        
     }
 }
 

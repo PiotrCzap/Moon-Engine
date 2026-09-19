@@ -34,7 +34,6 @@ while (!WindowShouldClose())
         // ==========================================
 
         BeginDrawing();
-
         ClearBackground(BLACK);
             rlImGuiBegin();
         
