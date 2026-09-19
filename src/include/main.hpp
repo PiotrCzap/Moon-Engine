@@ -101,7 +101,6 @@ struct GameObject
 {
    char name[32];
    bool isDragging;
-   int category_id;
    struct transform transform;
    struct sprite_renderer sprite_renderer;
    struct text_renderer text_renderer;
