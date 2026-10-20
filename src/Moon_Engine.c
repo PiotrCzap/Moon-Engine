@@ -10,19 +10,6 @@ Color dark_background = {40u, 40u, 40u, 255u};
 Color darker_background = {30u, 30u, 30u, 255u};
 Color darkers_background = {25u, 25u, 25u, 255u};
 
-// hierarchy panel
-Rectangle hierarchy_dock_left  = { 1, 24, 420, 1056 };
-Rectangle hierarchy_dock_right = { 1500, 24, 420, 1056 };
-Rectangle hierarchy_dock_full  = { 1500, 24, 420, 1056 };
-Rectangle hierarchy_dock_half  = { 1500, 24, 420, 579 };
-
-Rectangle hierarchy_panel = { 1500, 24, 420, 1056 }; 
-
-// inspector panel
-
-Rectangle inspector_dock_left = { 0, 24, 420, 576};
-Rectangle inspector_dock_right = { 1500, 24, 420, 576};
-
 void settings_window(void)
 {
     if (fork() == 0)
@@ -43,54 +30,16 @@ void editor_tilebar(void)
 
 void hierarchy(void)
 {
-    static Rectangle hierarchy_panel = { 1500, 24, 420, 1056 };
-    DrawRectangleRec(hierarchy_panel, dark_background);
+    Rectangle hierarchy_panel = {0, 24, 420, 576};
+    DrawRectangle(hierarchy_panel.x, hierarchy_panel.y, hierarchy_panel.width, hierarchy_panel.height, dark_background);
 
     // tilebar
-    int Tilebar_position_x = 1500;
-    int Tilebar_position_y = 24;
-    Rectangle tilebar = { hierarchy_panel.x, hierarchy_panel.y, hierarchy_panel.width, 22 };
-    DrawRectangleRec(tilebar, darker_background);
-    DrawText("HIERARCHY", tilebar.x + 4, tilebar.y + 4, 16, WHITE);
-    int button_size = 18;
-    Rectangle more_button = { hierarchy_panel.x + 400, hierarchy_panel.y + 3, button_size, button_size };
-    static int show_docking = 0;
-    if (GuiButton(more_button, "+"))
-    {
-        show_docking = 1;
-    }
 
-    if (show_docking)
-    {
-        DrawRectangle(hierarchy_panel.x + 293, hierarchy_panel.y + 26, 120, 120, darker_background);
+    Rectangle hierarchy_panel_tilebar = {0, 24, 420, 22};
+    DrawRectangle(hierarchy_panel_tilebar.x, hierarchy_panel_tilebar.y, hierarchy_panel_tilebar.width, hierarchy_panel_tilebar.height, darker_background);
 
-        GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,  ColorToInt(GRAY));
-        GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, ColorToInt(LIGHTGRAY));
-        GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, ColorToInt(DARKGRAY));
-        GuiSetStyle(BUTTON, BORDER_WIDTH, 0);
-
-        if (GuiButton((Rectangle){ hierarchy_panel.x + 301, hierarchy_panel.y + 32, 40, 70 }, ""))
-        {
-            show_docking = 0;
-            hierarchy_panel = hierarchy_dock_left;
-        }
-        if (GuiButton((Rectangle){ hierarchy_panel.x + 365, hierarchy_panel.y + 32, 40, 70 }, ""))
-        {
-            show_docking = 0;
-            hierarchy_panel = hierarchy_dock_right;
-        }
-        if (GuiButton((Rectangle){ hierarchy_panel.x + 301, hierarchy_panel.y + 106, 50, 34 }, ""))
-        {
-            show_docking = 0;
-            hierarchy_panel.height = hierarchy_dock_full.height;
-        }
-        if (GuiButton((Rectangle){ hierarchy_panel.x + 355, hierarchy_panel.y + 106, 50, 34 }, ""))
-        {
-            show_docking = 0;
-            hierarchy_panel.height = hierarchy_dock_half.height;
-        }
-    }
-
+    DrawText("HIERARCHY", hierarchy_panel_tilebar.x + 4, hierarchy_panel_tilebar.y + 4, 16, WHITE);
+    
     // more options
     
     GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,    ColorToInt((Color){ 0, 0, 0, 0 }));
@@ -106,9 +55,9 @@ void hierarchy(void)
     GuiSetStyle(BUTTON, TEXT_COLOR_FOCUSED,   ColorToInt(WHITE));
     GuiSetStyle(BUTTON, TEXT_COLOR_PRESSED,   ColorToInt(WHITE));
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 24); 
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 32); 
 
-    Rectangle button = { hierarchy_panel.x + 350, hierarchy_panel.y + 3, 18, 18 };
+    Rectangle button = { 398, 28, 18, 18 };
     if (GuiButton(button, "+"))
     {
         settings_window();
@@ -134,19 +83,17 @@ void file_manager(void)
 
 void inspector(void)
 {
-    int position_x = 0;
-    int position_y = 24;
+    int position_x = 1500;
+    int position_y = 23;
     int size_x = 420;
-    int size_y = 576;
+    int size_y = 1057;
     DrawRectangle(position_x, position_y, size_x, size_y, dark_background);
 
     // tilebar
-    int Tilebar_position_x = 0;
-    int Tilebar_position_y = 24;
-    int Tilebar_size_x = 420;
-    int Tilebar_size_y = 22;
-    DrawRectangle(Tilebar_position_x, Tilebar_position_y, Tilebar_size_x, Tilebar_size_y, darker_background);
-    DrawText("INSPECTOR", Tilebar_position_x + 4, Tilebar_position_y + 4, 16, WHITE);
+    Rectangle inspector_panel_tilebar = {1499, 24, 421, 22};
+
+    DrawRectangle(inspector_panel_tilebar.x, inspector_panel_tilebar.y, inspector_panel_tilebar.width, inspector_panel_tilebar.height, darker_background);
+    DrawText("INSPECTOR", inspector_panel_tilebar.x + 4, inspector_panel_tilebar.y + 4, 16, WHITE);
 
 }
 
