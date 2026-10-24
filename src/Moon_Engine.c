@@ -1,9 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include <unistd.h>
 #include <signal.h>
+#include "Moon_Engine.h"
 
 Color background = {50u, 50u, 50u, 255u};
 Color dark_background = {40u, 40u, 40u, 255u};
@@ -27,6 +29,55 @@ void editor_tilebar(void)
     int size_y = 24;
     DrawRectangle(position_x, position_y, size_x, size_y, darker_background);
 }
+
+static GameObject objects[MAX_OBJECTS];
+static int object_count = 0;   // ile obiektów istnieje
+static int selected = -1;      // który jest zaznaczony (-1 = żaden)
+static int next_id = 1;
+
+void AddGameObject(const char *name, float x, float y)
+{
+    if (object_count >= MAX_OBJECTS) return;   // tablica pełna
+
+    GameObject *o = &objects[object_count];    // następne wolne miejsce
+
+    snprintf(o->name, MAX_NAME_LEN, "%s", name);
+    o->ID = next_id;
+    next_id ++;
+    o->transform.x = x;
+    o->transform.y = y;
+    o->visible = 1;
+
+    object_count++;                            // teraz jest o jeden więcej
+}
+
+void hierarchy_object_grid(const int pos_x, const int pos_y, const int size_x, const int size_y)
+{
+    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,    ColorToInt(background));
+    GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED,   ColorToInt(darker_background));
+    GuiSetStyle(BUTTON, BASE_COLOR_PRESSED,   ColorToInt(darkers_background));
+
+    GuiSetStyle(BUTTON, BORDER_COLOR_NORMAL,  ColorToInt(WHITE));
+    GuiSetStyle(BUTTON, BORDER_COLOR_FOCUSED, ColorToInt(WHITE));
+    GuiSetStyle(BUTTON, BORDER_COLOR_PRESSED, ColorToInt(WHITE));
+    GuiSetStyle(BUTTON, BORDER_WIDTH, 0);
+
+    GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL,    ColorToInt(WHITE));
+    GuiSetStyle(BUTTON, TEXT_COLOR_FOCUSED,   ColorToInt(WHITE));
+    GuiSetStyle(BUTTON, TEXT_COLOR_PRESSED,   ColorToInt(WHITE));
+    GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 32); 
+
+    Rectangle hierarchy_object_list_panel = {pos_x, pos_y, size_x, size_y};
+
+    if (GuiButton(hierarchy_object_list_panel, "OBJ"))
+    {
+        
+    }
+    
+}
+
+
 
 void hierarchy(void)
 {
@@ -60,7 +111,23 @@ void hierarchy(void)
     Rectangle button = { 398, 28, 18, 18 };
     if (GuiButton(button, "+"))
     {
-        settings_window();
+        AddGameObject("Object", 100, 100);
+    }
+
+    const int columns = 6;   // ile obiektów w jednym rzędzie
+
+    for (int i = 0; i < object_count; i++)
+    {
+        int col = i % columns;
+        int row = i / columns;
+    
+        Rectangle r = { 20 + col * 60, 60 + row * 60, 50, 50 };
+    
+        if (GuiButton(r, objects[i].name))
+            selected = i;
+    
+        if (i == selected)
+            DrawRectangleLinesEx(r, 2, WHITE);
     }
 }
 
@@ -84,7 +151,7 @@ void file_manager(void)
 void inspector(void)
 {
     int position_x = 1500;
-    int position_y = 23;
+    int position_y = 24;
     int size_x = 420;
     int size_y = 1057;
     DrawRectangle(position_x, position_y, size_x, size_y, dark_background);
@@ -94,17 +161,23 @@ void inspector(void)
 
     DrawRectangle(inspector_panel_tilebar.x, inspector_panel_tilebar.y, inspector_panel_tilebar.width, inspector_panel_tilebar.height, darker_background);
     DrawText("INSPECTOR", inspector_panel_tilebar.x + 4, inspector_panel_tilebar.y + 4, 16, WHITE);
-
+    if (selected >= 0)
+    {
+        GameObject *o = &objects[selected];
+        DrawText(o->name, position_x + 150, position_y + 150, 32, WHITE);
+        DrawText(TextFormat("%s (ID %d)", o->name, o->ID), position_x + 50, position_y + 200, 32, WHITE);
+    }
 }
 
 void viewport(void)
 {
+    Color viewport_color = {60u, 60u, 60u, 255u};
     // viewport
     int position_x = 420;
     int position_y = 24;
     int size_x = 1080;
     int size_y = 576;
-    DrawRectangle(position_x, position_y, size_x, size_y, BLACK);
+    DrawRectangle(position_x, position_y, size_x, size_y, viewport_color);
 
     // tilebar
     int Tilebar_position_x = 420;
@@ -131,7 +204,7 @@ int main(void)
         inspector();
         hierarchy();
         EndDrawing();
-        
+
     }
     CloseWindow();
     return 0;    
