@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
@@ -11,6 +12,8 @@ Color background = {50u, 50u, 50u, 255u};
 Color dark_background = {40u, 40u, 40u, 255u};
 Color darker_background = {30u, 30u, 30u, 255u};
 Color darkers_background = {25u, 25u, 25u, 255u};
+
+int actual_object = 0;
 
 void settings_window(void)
 {
@@ -30,28 +33,31 @@ void editor_tilebar(void)
     DrawRectangle(position_x, position_y, size_x, size_y, darker_background);
 }
 
-static GameObject objects[MAX_OBJECTS];
-static int object_count = 0;   // ile obiektów istnieje
-static int selected = -1;      // który jest zaznaczony (-1 = żaden)
-static int next_id = 1;
+GameObject objects[MAX_OBJECTS];
+int object_count = 0;
 
-void AddGameObject(const char *name, float x, float y)
+
+void AddGameObject(const char *name, const float pos_x, const float pos_y, const float pos_z)
 {
-    if (object_count >= MAX_OBJECTS) return;   // tablica pełna
-
-    GameObject *o = &objects[object_count];    // następne wolne miejsce
-
-    snprintf(o->name, MAX_NAME_LEN, "%s", name);
-    o->ID = next_id;
-    next_id ++;
-    o->transform.x = x;
-    o->transform.y = y;
-    o->visible = 1;
-
-    object_count++;                            // teraz jest o jeden więcej
+    if (object_count >= MAX_OBJECTS) return;
+    
+    objects[object_count].ID = object_count;
+    snprintf(objects[object_count].name, MAX_NAME_LEN, "obj %i", objects[object_count].ID);
+    objects[object_count].visible = 1;
+    objects[object_count].renderer.color = WHITE;
+    objects[object_count].active = 1;
+    objects[object_count].renderer.graphic = 0;
+    Texture2D texture = { 0 };
+    objects[object_count].renderer.sprite = texture;
+    objects[object_count].transform.x = pos_x;
+    objects[object_count].transform.y = pos_y;
+    objects[object_count].transform.z = pos_z;
+    printf("%s . %i\n", objects[object_count].name, objects[object_count].ID);
+    object_count ++;
+    
 }
 
-void hierarchy_object_grid(const int pos_x, const int pos_y, const int size_x, const int size_y)
+void hierarchy_object_grid(const GameObject obj, const int pos_x, const int pos_y, const int size_x, const int size_y)
 {
     GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,    ColorToInt(background));
     GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED,   ColorToInt(darker_background));
@@ -70,9 +76,9 @@ void hierarchy_object_grid(const int pos_x, const int pos_y, const int size_x, c
 
     Rectangle hierarchy_object_list_panel = {pos_x, pos_y, size_x, size_y};
 
-    if (GuiButton(hierarchy_object_list_panel, "OBJ"))
+    if (GuiButton(hierarchy_object_list_panel, "O"))
     {
-        
+        actual_object = obj.ID;
     }
     
 }
@@ -111,23 +117,13 @@ void hierarchy(void)
     Rectangle button = { 398, 28, 18, 18 };
     if (GuiButton(button, "+"))
     {
-        AddGameObject("Object", 100, 100);
+        AddGameObject("obiekt", 10, 10, 10);
     }
-
-    const int columns = 6;   // ile obiektów w jednym rzędzie
-
-    for (int i = 0; i < object_count; i++)
+    int hierarchy_object_grid_y = 0;
+    for (unsigned int i = 0; i < object_count; i++)
     {
-        int col = i % columns;
-        int row = i / columns;
-    
-        Rectangle r = { 20 + col * 60, 60 + row * 60, 50, 50 };
-    
-        if (GuiButton(r, objects[i].name))
-            selected = i;
-    
-        if (i == selected)
-            DrawRectangleLinesEx(r, 2, WHITE);
+        hierarchy_object_grid(objects[i], 10 + (i - 6 * hierarchy_object_grid_y) * 60, (hierarchy_object_grid_y + 1) * 60, 50, 50);
+        if ((i + 1) % 6 == 0) hierarchy_object_grid_y++;
     }
 }
 
@@ -148,6 +144,7 @@ void file_manager(void)
     DrawText("FILE MANAGER", Tilebar_position_x + 4, Tilebar_position_y + 4, 16, WHITE);
 }
 
+
 void inspector(void)
 {
     int position_x = 1500;
@@ -161,12 +158,10 @@ void inspector(void)
 
     DrawRectangle(inspector_panel_tilebar.x, inspector_panel_tilebar.y, inspector_panel_tilebar.width, inspector_panel_tilebar.height, darker_background);
     DrawText("INSPECTOR", inspector_panel_tilebar.x + 4, inspector_panel_tilebar.y + 4, 16, WHITE);
-    if (selected >= 0)
-    {
-        GameObject *o = &objects[selected];
-        DrawText(o->name, position_x + 150, position_y + 150, 32, WHITE);
-        DrawText(TextFormat("%s (ID %d)", o->name, o->ID), position_x + 50, position_y + 200, 32, WHITE);
-    }
+
+    if (object_count > 0) DrawText(objects[actual_object].name, position_x + 10, position_y + 50, 16, WHITE);
+    
+    
 }
 
 void viewport(void)

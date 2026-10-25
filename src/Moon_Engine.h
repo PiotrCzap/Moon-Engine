@@ -6,10 +6,9 @@
 #define MAX_NAME_LEN 32
 #define MAX_OBJECTS  128
 
-typedef struct Category
-{
-    char name[MAX_NAME_LEN];
-} Category;
+// ======================================================================
+// Components
+// ======================================================================
 
 typedef struct ObjectTransform
 {
@@ -18,19 +17,28 @@ typedef struct ObjectTransform
 
 typedef struct SpriteRenderer
 {
+    int graphic;
     Texture2D sprite;   // albo int, jeśli na razie trzymasz tylko numer
     Color color;        // zamiast int, żeby od razu pasowało do raylib
 } SpriteRenderer;
 
+
+typedef struct Category
+{
+    const char name[MAX_NAME_LEN];
+} Category;
+
 typedef struct GameObject
 {
-    int  ID;
+    int ID;
     char name[MAX_NAME_LEN];
-    int  visible;
-    int  active;                 // do systemu dodawania (slot wolny/zajęty)
+    int visible;
+    int active;
 
-    ObjectTransform transform;   // pozycja obiektu
-    SpriteRenderer  renderer;    // wygląd obiektu
+    ObjectTransform transform;
+    SpriteRenderer renderer;
 } GameObject;
+
+
 
 #endif
