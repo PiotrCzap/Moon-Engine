@@ -119,11 +119,11 @@ void hierarchy(void)
     {
         AddGameObject("obiekt", 10, 10, 10);
     }
-    int hierarchy_object_grid_y = 0;
     for (unsigned int i = 0; i < object_count; i++)
     {
-        hierarchy_object_grid(objects[i], 10 + (i - 6 * hierarchy_object_grid_y) * 60, (hierarchy_object_grid_y + 1) * 60, 50, 50);
-        if ((i + 1) % 6 == 0) hierarchy_object_grid_y++;
+        int col = i % 6;
+        int row = i / 6;
+        hierarchy_object_grid(objects[i], 10 + col * 60, (row + 1) * 60, 50, 50);
     }
 }
 
