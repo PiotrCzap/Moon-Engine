@@ -212,8 +212,6 @@ void inspector(void)
         }
     }
     
-    
-    
 }
 
 // =============================================================================================================
@@ -231,7 +229,12 @@ void viewport(void)
     DrawRectangle(position_x, position_y, size_x, size_y, viewport_color);
 
     static Vector2 view_offset = { 850.0f, 256.0f };
+    static float zoom = 1.0f; // camera zoom
     static bool is_dragging = false;
+
+    Rectangle viewport_rect = { position_x, position_y, size_x, size_y };
+    Vector2 mouse = GetMousePosition();
+    bool mouse_in_viewport = CheckCollisionPointRec(mouse, viewport_rect);
 
     if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
     {
@@ -240,13 +243,34 @@ void viewport(void)
         view_offset.y += delta.y;
     }
 
+    float wheel = GetMouseWheelMove();
+    if (wheel != 0 && mouse_in_viewport)
+    {
+        Vector2 world_before = {
+            (mouse.x - view_offset.x) / zoom,
+            (mouse.y - view_offset.y) / zoom
+        };
+
+        zoom += wheel * 0.1f * zoom;
+        if (zoom < 0.1f) zoom = 0.1f;
+        if (zoom > 5.0f) zoom = 5.0f;
+
+        view_offset.x = mouse.x - world_before.x * zoom;
+        view_offset.y = mouse.y - world_before.y * zoom;
+    }
+
+    BeginScissorMode(position_x, position_y + 22, size_x, size_y - 22);
+
     for (unsigned int i = 0; i < object_count; i++)
     {
         Vector2 position = { 
-            objects[i].transform.pos_x + view_offset.x,
-            objects[i].transform.pos_y + view_offset.y
+            objects[i].transform.pos_x * zoom + view_offset.x,
+            objects[i].transform.pos_y * zoom + view_offset.y
         };
-        Vector2 size = { objects[i].transform.size_x, objects[i].transform.size_y };
+        Vector2 size = {
+            objects[i].transform.size_x * zoom,
+            objects[i].transform.size_y * zoom
+        };
 
         Color color = objects[i].renderer.color;
 
@@ -254,7 +278,7 @@ void viewport(void)
         if (objects[i].renderer.graphic == 0)
         {
             DrawRectangleV(position, size, color);
-            DrawRectangleLines((int)position.x, (int)position.y, (int)size.x, (int)size.y, BLACK);
+            //DrawRectangleLines((int)position.x, (int)position.y, (int)size.x, (int)size.y, BLACK);
         }
         if (objects[i].renderer.graphic == 1)
         {
@@ -263,7 +287,7 @@ void viewport(void)
             Vector2 v3 = { position.x + size.x, position.y + size.y };
             
             DrawTriangle(v1, v2, v3, color);
-            DrawTriangleLines(v1, v2, v3, BLACK);
+            //DrawTriangleLines(v1, v2, v3, BLACK);
         }
         if (objects[i].renderer.graphic == 2)
         {
@@ -271,12 +295,13 @@ void viewport(void)
             float radius = (size.x < size.y ? size.x : size.y) / 2.0f;
             
             DrawCircleV(center, radius, color);
-            DrawCircleLines((int)center.x, (int)center.y, radius, BLACK);
+            //DrawCircleLines((int)center.x, (int)center.y, radius, BLACK);
         }
-        
-        
     }
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+
+    EndScissorMode();
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && mouse_in_viewport)
     {
         int clicked_index = -1;
 
@@ -284,13 +309,13 @@ void viewport(void)
         for (int i = (int)object_count - 1; i >= 0; i--)
         {
             Rectangle obj_rect = { 
-                objects[i].transform.pos_x + view_offset.x,
-                objects[i].transform.pos_y + view_offset.y,
-                objects[i].transform.size_x, 
-                objects[i].transform.size_y 
+                objects[i].transform.pos_x * zoom + view_offset.x,
+                objects[i].transform.pos_y * zoom + view_offset.y,
+                objects[i].transform.size_x * zoom,
+                objects[i].transform.size_y * zoom
             };
 
-            if (CheckCollisionPointRec(GetMousePosition(), obj_rect))
+            if (CheckCollisionPointRec(mouse, obj_rect))
             {
                 clicked_index = i;
                 break;
@@ -312,12 +337,9 @@ void viewport(void)
     {
         Vector2 delta = GetMouseDelta();
 
-        objects[actual_object].transform.pos_x += delta.x;
-        objects[actual_object].transform.pos_y += delta.y;
+        objects[actual_object].transform.pos_x += delta.x / zoom;
+        objects[actual_object].transform.pos_y += delta.y / zoom;
     }
-
-    
-    
 
     // tilebar
     int Tilebar_position_x = 420;
@@ -326,8 +348,6 @@ void viewport(void)
     int Tilebar_size_y = 22;
     DrawRectangle(Tilebar_position_x, Tilebar_position_y, Tilebar_size_x, Tilebar_size_y, darker_background);
     DrawText("VIEWPORT", Tilebar_position_x + 4, Tilebar_position_y + 4, 16, WHITE);
-
-    
 }
 
 // =============================================================================================================
@@ -353,5 +373,5 @@ int main(void)
 
     }
     CloseWindow();
-    return 0;    
+    return 0;
 }
