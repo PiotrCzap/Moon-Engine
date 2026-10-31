@@ -211,6 +211,12 @@ void inspector(void)
             objects[actual_object].renderer.graphic = SpriteOptions_active;
         }
     }
+    if (object_count > 0 && actual_object >= 0 && actual_object < object_count)
+    {
+        Rectangle Color_rect = { position_x + 50, position_y + 200, 200, 200 };
+        if (GuiColorPicker(Color_rect, "Color", &objects[actual_object].renderer.color)) return;
+        
+    }
     
 }
 
@@ -231,6 +237,7 @@ void viewport(void)
     static Vector2 view_offset = { 850.0f, 256.0f };
     static float zoom = 1.0f; // camera zoom
     static bool is_dragging = false;
+    static int active_handle = -1;
 
     Rectangle viewport_rect = { position_x, position_y, size_x, size_y };
     Vector2 mouse = GetMousePosition();
@@ -259,8 +266,96 @@ void viewport(void)
         view_offset.y = mouse.y - world_before.y * zoom;
     }
 
-    BeginScissorMode(position_x, position_y + 22, size_x, size_y - 22);
+    // Sprawdzanie kliknięcia w 8 uchwytach przed rysowaniem i przesuwaniem
+    if (actual_object >= 0 && actual_object < object_count && mouse_in_viewport)
+    {
+        // Znajdujemy indeks aktualnego obiektu po ID
+        int current_index = -1;
+        for (unsigned int i = 0; i < object_count; i++)
+        {
+            if (objects[i].ID == actual_object) { current_index = (int)i; break; }
+        }
 
+        if (current_index != -1)
+        {
+            float obj_screen_x = objects[current_index].transform.pos_x * zoom + view_offset.x;
+            float obj_screen_y = objects[current_index].transform.pos_y * zoom + view_offset.y;
+            float obj_w = objects[current_index].transform.size_x * zoom;
+            float obj_h = objects[current_index].transform.size_y * zoom;
+
+            Vector2 handles[8] = {
+                { obj_screen_x, obj_screen_y },
+                { obj_screen_x + obj_w / 2.0f, obj_screen_y },
+                { obj_screen_x + obj_w, obj_screen_y },
+                { obj_screen_x + obj_w, obj_screen_y + obj_h / 2.0f },
+                { obj_screen_x + obj_w, obj_screen_y + obj_h },
+                { obj_screen_x + obj_w / 2.0f, obj_screen_y + obj_h },
+                { obj_screen_x, obj_screen_y + obj_h },
+                { obj_screen_x, obj_screen_y + obj_h / 2.0f }
+            };
+
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                for (unsigned int h = 0; h < 8; h++)
+                {
+                    Rectangle handle_hitbox = { handles[h].x - 8, handles[h].y - 8, 16, 16 };
+                    if (CheckCollisionPointRec(mouse, handle_hitbox))
+                    {
+                        active_handle = h;
+                        is_dragging = false;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+    {
+        active_handle = -1;
+        is_dragging = false;
+    }
+
+    // --- Obsługa zmiany rozmiaru obiektu
+    if (active_handle != -1 && actual_object >= 0 && actual_object < object_count)
+    {
+        int current_index = -1;
+        for (unsigned int i = 0; i < object_count; i++) {
+            if (objects[i].ID == actual_object) { current_index = (int)i; break; }
+        }
+
+        if (current_index != -1)
+        {
+            Vector2 delta = GetMouseDelta();
+            float dx = delta.x / zoom;
+            float dy = delta.y / zoom;
+
+            if (active_handle == 0 || active_handle == 6 || active_handle == 7)
+            {
+                objects[current_index].transform.pos_x += dx;
+                objects[current_index].transform.size_x -= dx;
+            }
+            if (active_handle == 2 || active_handle == 3 || active_handle == 4)
+            {
+                objects[current_index].transform.size_x += dx;
+            }
+            if (active_handle == 0 || active_handle == 1 || active_handle == 2)
+            {
+                objects[current_index].transform.pos_y += dy;
+                objects[current_index].transform.size_y -= dy;
+            }
+            if (active_handle == 4 || active_handle == 5 || active_handle == 6)
+            {
+                objects[current_index].transform.size_y += dy;
+            }
+
+            if (objects[current_index].transform.size_x < 10.0f) objects[current_index].transform.size_x = 10.0f;
+            if (objects[current_index].transform.size_y < 10.0f) objects[current_index].transform.size_y = 10.0f;
+        }
+    }
+
+    BeginScissorMode(position_x, position_y + 22, size_x, size_y - 22);
+    
     for (unsigned int i = 0; i < object_count; i++)
     {
         Vector2 position = { 
@@ -297,11 +392,34 @@ void viewport(void)
             DrawCircleV(center, radius, color);
             //DrawCircleLines((int)center.x, (int)center.y, radius, BLACK);
         }
+        if (objects[i].ID == actual_object)
+        {
+            Rectangle outline = { position.x - 2, position.y - 2, size.x + 4, size.y + 4 };
+            DrawRectangleLinesEx(outline, 2.0f, BLUE);
+
+            Vector2 handles[8] = {
+                { position.x, position.y },
+                { position.x + size.x / 2.0f, position.y },
+                { position.x + size.x, position.y },
+                { position.x + size.x, position.y + size.y / 2.0f },
+                { position.x + size.x, position.y + size.y },
+                { position.x + size.x / 2.0f, position.y + size.y },
+                { position.x, position.y + size.y },
+                { position.x, position.y + size.y / 2.0f }
+            };
+
+            for (unsigned int h = 0; h < 8; h++)
+            {
+                Rectangle handle_rect = { handles[h].x - 4, handles[h].y - 4, 8, 8 };
+                DrawRectangleRec(handle_rect, BLUE);
+                DrawRectangleLinesEx(handle_rect, 1.0f, WHITE);
+            }
+        }
     }
 
     EndScissorMode();
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && mouse_in_viewport)
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && mouse_in_viewport && active_handle == -1)
     {
         int clicked_index = -1;
 
@@ -333,12 +451,20 @@ void viewport(void)
         is_dragging = false;
     }
 
-    if (is_dragging && actual_object >= 0 && actual_object < object_count)
+    if (is_dragging && actual_object >= 0 && actual_object < object_count && active_handle == -1)
     {
-        Vector2 delta = GetMouseDelta();
+        int current_index = -1;
+        for (unsigned int i = 0; i < object_count; i++)
+        {
+            if (objects[i].ID == actual_object) { current_index = (int)i; break; }
+        }
 
-        objects[actual_object].transform.pos_x += delta.x / zoom;
-        objects[actual_object].transform.pos_y += delta.y / zoom;
+        if (current_index != -1)
+        {
+            Vector2 delta = GetMouseDelta();
+            objects[current_index].transform.pos_x += delta.x / zoom;
+            objects[current_index].transform.pos_y += delta.y / zoom;
+        }
     }
 
     // tilebar
