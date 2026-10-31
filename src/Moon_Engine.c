@@ -37,21 +37,24 @@ GameObject objects[MAX_OBJECTS];
 int object_count = 0;
 
 
-void AddGameObject(const char *name, const float pos_x, const float pos_y, const float pos_z)
+void AddGameObject(const char *name, const float pos_x, const float pos_y, const float pos_z, const float size_x, const float size_y, const float size_z)
 {
     if (object_count >= MAX_OBJECTS) return;
     
     objects[object_count].ID = object_count;
-    snprintf(objects[object_count].name, MAX_NAME_LEN, "obj %i", objects[object_count].ID);
+    snprintf(objects[object_count].name, MAX_NAME_LEN, "Empty Object_ %i", objects[object_count].ID);
     objects[object_count].visible = 1;
     objects[object_count].renderer.color = WHITE;
     objects[object_count].active = 1;
     objects[object_count].renderer.graphic = 0;
     Texture2D texture = { 0 };
     objects[object_count].renderer.sprite = texture;
-    objects[object_count].transform.x = pos_x;
-    objects[object_count].transform.y = pos_y;
-    objects[object_count].transform.z = pos_z;
+    objects[object_count].transform.pos_x = pos_x;
+    objects[object_count].transform.pos_y = pos_y;
+    objects[object_count].transform.pos_z = pos_z;
+    objects[object_count].transform.size_x = size_x;
+    objects[object_count].transform.size_y = size_y;
+    objects[object_count].transform.size_z = size_z;
     printf("%s . %i\n", objects[object_count].name, objects[object_count].ID);
     object_count ++;
     
@@ -76,7 +79,7 @@ void hierarchy_object_grid(const GameObject obj, const int pos_x, const int pos_
 
     Rectangle hierarchy_object_list_panel = {pos_x, pos_y, size_x, size_y};
 
-    if (GuiButton(hierarchy_object_list_panel, "O"))
+    if (GuiButton(hierarchy_object_list_panel, ""))
     {
         actual_object = obj.ID;
     }
@@ -117,7 +120,7 @@ void hierarchy(void)
     Rectangle button = { 398, 28, 18, 18 };
     if (GuiButton(button, "+"))
     {
-        AddGameObject("obiekt", 10, 10, 10);
+        AddGameObject("Empty Object_", 10, 10, 10, 100, 100, 100);
     }
     for (unsigned int i = 0; i < object_count; i++)
     {
@@ -144,7 +147,6 @@ void file_manager(void)
     DrawText("FILE MANAGER", Tilebar_position_x + 4, Tilebar_position_y + 4, 16, WHITE);
 }
 
-
 void inspector(void)
 {
     int position_x = 1500;
@@ -153,16 +155,52 @@ void inspector(void)
     int size_y = 1057;
     DrawRectangle(position_x, position_y, size_x, size_y, dark_background);
 
-    // tilebar
+    // Tilebar
     Rectangle inspector_panel_tilebar = {1499, 24, 421, 22};
-
     DrawRectangle(inspector_panel_tilebar.x, inspector_panel_tilebar.y, inspector_panel_tilebar.width, inspector_panel_tilebar.height, darker_background);
     DrawText("INSPECTOR", inspector_panel_tilebar.x + 4, inspector_panel_tilebar.y + 4, 16, WHITE);
 
-    if (object_count > 0) DrawText(objects[actual_object].name, position_x + 10, position_y + 50, 16, WHITE);
+    if (object_count > 0 && actual_object >= 0 && actual_object < object_count)
+    {
+        GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, ColorToInt(WHITE));
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 16); 
+        Rectangle textbox = { position_x + 50, position_y + 30, 300, 16 };
+        
+        static bool textBoxEditMode = false;
+
+        if (GuiTextBox(textbox, objects[actual_object].name, MAX_NAME_LEN, textBoxEditMode))
+        {
+            textBoxEditMode = !textBoxEditMode;
+        }
+    }
+
+    if (object_count > 0 && actual_object >= 0 && actual_object < object_count)
+    {
+        GuiSetStyle(DROPDOWNBOX, BASE_COLOR_NORMAL, ColorToInt(darker_background));
+        GuiSetStyle(DROPDOWNBOX, BASE_COLOR_FOCUSED, ColorToInt(darkers_background));
+        GuiSetStyle(DROPDOWNBOX, BASE_COLOR_PRESSED, ColorToInt(dark_background));
+        GuiSetStyle(DROPDOWNBOX, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+        GuiSetStyle(DROPDOWNBOX, TEXT_COLOR_NORMAL, ColorToInt(WHITE));
+        GuiSetStyle(DROPDOWNBOX, BORDER_WIDTH, 0);
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 16); 
+        Rectangle SpriteOptions_menu_rect = { position_x + 50, position_y + 60, 100, 24 };
+
+        static bool SpriteOptionsEditMode = false;
+        static int SpriteOptions_active = 0; // aktualnie wybrana opcja
+
+        // opcje w menu
+        const char *SpriteOptions = "Square;Triangle;Circle";
+
+        if (GuiDropdownBox(SpriteOptions_menu_rect, SpriteOptions, &SpriteOptions_active, SpriteOptionsEditMode))
+        {
+            SpriteOptionsEditMode = !SpriteOptionsEditMode;
+        }
+    }
+    
     
     
 }
+
 
 void viewport(void)
 {
@@ -174,6 +212,72 @@ void viewport(void)
     int size_y = 576;
     DrawRectangle(position_x, position_y, size_x, size_y, viewport_color);
 
+    static Vector2 view_offset = { 850.0f, 256.0f };
+    static bool is_dragging = false;
+
+    if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+    {
+        Vector2 delta = GetMouseDelta();
+        view_offset.x += delta.x;
+        view_offset.y += delta.y;
+    }
+
+    for (unsigned int i = 0; i < object_count; i++)
+    {
+        Vector2 position = { 
+            objects[i].transform.pos_x + view_offset.x,
+            objects[i].transform.pos_y + view_offset.y
+        };
+        Vector2 size = { objects[i].transform.size_x, objects[i].transform.size_y };
+
+        Color color = objects[i].renderer.color;
+
+        DrawRectangleV(position, size, color);
+        DrawRectangleLines((int)position.x, (int)position.y, (int)size.x, (int)size.y, BLACK);
+        
+    }
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        int clicked_index = -1;
+
+        // Sprawdzamy wszystkie obiekty które zostały kliknięte
+        for (int i = (int)object_count - 1; i >= 0; i--)
+        {
+            Rectangle obj_rect = { 
+                objects[i].transform.pos_x + view_offset.x,
+                objects[i].transform.pos_y + view_offset.y,
+                objects[i].transform.size_x, 
+                objects[i].transform.size_y 
+            };
+
+            if (CheckCollisionPointRec(GetMousePosition(), obj_rect))
+            {
+                clicked_index = i;
+                break;
+            }
+        }
+        if (clicked_index != -1)
+        {
+            actual_object = objects[clicked_index].ID;
+            is_dragging = true;
+        }
+    }
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+    {
+        is_dragging = false;
+    }
+
+    if (is_dragging && actual_object >= 0 && actual_object < object_count)
+    {
+        Vector2 delta = GetMouseDelta();
+
+        objects[actual_object].transform.pos_x += delta.x;
+        objects[actual_object].transform.pos_y += delta.y;
+    }
+
+    
+    
+
     // tilebar
     int Tilebar_position_x = 420;
     int Tilebar_position_y = 24;
@@ -181,7 +285,11 @@ void viewport(void)
     int Tilebar_size_y = 22;
     DrawRectangle(Tilebar_position_x, Tilebar_position_y, Tilebar_size_x, Tilebar_size_y, darker_background);
     DrawText("VIEWPORT", Tilebar_position_x + 4, Tilebar_position_y + 4, 16, WHITE);
+
+    
 }
+
+
 
 int main(void)
 {
@@ -193,8 +301,8 @@ int main(void)
         ClearBackground(BLACK);
         BeginDrawing();
         DrawRectangle(0, 0, 1920, 1080, background);
-        editor_tilebar();
         viewport();
+        editor_tilebar();
         file_manager();
         inspector();
         hierarchy();

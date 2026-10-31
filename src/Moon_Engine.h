@@ -12,7 +12,8 @@
 
 typedef struct ObjectTransform
 {
-    float x, y, z;
+    float pos_x, pos_y, pos_z;
+    float size_x, size_y, size_z;
 } ObjectTransform;
 
 typedef struct SpriteRenderer
