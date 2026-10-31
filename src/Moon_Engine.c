@@ -8,12 +8,14 @@
 #include <signal.h>
 #include "Moon_Engine.h"
 
+// =============================================================================================================
+// COLORS
+// =============================================================================================================
+
 Color background = {50u, 50u, 50u, 255u};
 Color dark_background = {40u, 40u, 40u, 255u};
 Color darker_background = {30u, 30u, 30u, 255u};
 Color darkers_background = {25u, 25u, 25u, 255u};
-
-int actual_object = 0;
 
 void settings_window(void)
 {
@@ -33,9 +35,13 @@ void editor_tilebar(void)
     DrawRectangle(position_x, position_y, size_x, size_y, darker_background);
 }
 
+// =============================================================================================================
+// HIERARCHY
+// =============================================================================================================
+
 GameObject objects[MAX_OBJECTS];
 int object_count = 0;
-
+int actual_object = 0;
 
 void AddGameObject(const char *name, const float pos_x, const float pos_y, const float pos_z, const float size_x, const float size_y, const float size_z)
 {
@@ -130,6 +136,10 @@ void hierarchy(void)
     }
 }
 
+// =============================================================================================================
+// FILE MANAGER
+// =============================================================================================================
+
 void file_manager(void)
 {
     int position_x = 0;
@@ -146,6 +156,10 @@ void file_manager(void)
     DrawRectangle(Tilebar_position_x, Tilebar_position_y, Tilebar_size_x, Tilebar_size_y, darker_background);
     DrawText("FILE MANAGER", Tilebar_position_x + 4, Tilebar_position_y + 4, 16, WHITE);
 }
+
+// =============================================================================================================
+// INSPECTOR
+// =============================================================================================================
 
 void inspector(void)
 {
@@ -194,6 +208,7 @@ void inspector(void)
         if (GuiDropdownBox(SpriteOptions_menu_rect, SpriteOptions, &SpriteOptions_active, SpriteOptionsEditMode))
         {
             SpriteOptionsEditMode = !SpriteOptionsEditMode;
+            objects[actual_object].renderer.graphic = SpriteOptions_active;
         }
     }
     
@@ -201,6 +216,9 @@ void inspector(void)
     
 }
 
+// =============================================================================================================
+// VIEWPORT
+// =============================================================================================================
 
 void viewport(void)
 {
@@ -232,8 +250,30 @@ void viewport(void)
 
         Color color = objects[i].renderer.color;
 
-        DrawRectangleV(position, size, color);
-        DrawRectangleLines((int)position.x, (int)position.y, (int)size.x, (int)size.y, BLACK);
+        
+        if (objects[i].renderer.graphic == 0)
+        {
+            DrawRectangleV(position, size, color);
+            DrawRectangleLines((int)position.x, (int)position.y, (int)size.x, (int)size.y, BLACK);
+        }
+        if (objects[i].renderer.graphic == 1)
+        {
+            Vector2 v1 = { position.x + size.x / 2.0f, position.y };
+            Vector2 v2 = { position.x, position.y + size.y };
+            Vector2 v3 = { position.x + size.x, position.y + size.y };
+            
+            DrawTriangle(v1, v2, v3, color);
+            DrawTriangleLines(v1, v2, v3, BLACK);
+        }
+        if (objects[i].renderer.graphic == 2)
+        {
+            Vector2 center = { position.x + size.x / 2.0f, position.y + size.y / 2.0f };
+            float radius = (size.x < size.y ? size.x : size.y) / 2.0f;
+            
+            DrawCircleV(center, radius, color);
+            DrawCircleLines((int)center.x, (int)center.y, radius, BLACK);
+        }
+        
         
     }
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -256,6 +296,7 @@ void viewport(void)
                 break;
             }
         }
+
         if (clicked_index != -1)
         {
             actual_object = objects[clicked_index].ID;
@@ -289,7 +330,9 @@ void viewport(void)
     
 }
 
-
+// =============================================================================================================
+// MAIN
+// =============================================================================================================
 
 int main(void)
 {
