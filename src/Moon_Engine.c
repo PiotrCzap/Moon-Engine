@@ -126,7 +126,7 @@ void hierarchy(void)
     Rectangle button = { 398, 28, 18, 18 };
     if (GuiButton(button, "+"))
     {
-        AddGameObject("Empty Object_", 10, 10, 10, 100, 100, 100);
+        AddGameObject("Empty Object_", 0.0f, 0.0f, 0.0f, 100.0f, 100.0f, 100.0f);
     }
     for (unsigned int i = 0; i < object_count; i++)
     {
@@ -174,6 +174,8 @@ void inspector(void)
     DrawRectangle(inspector_panel_tilebar.x, inspector_panel_tilebar.y, inspector_panel_tilebar.width, inspector_panel_tilebar.height, darker_background);
     DrawText("INSPECTOR", inspector_panel_tilebar.x + 4, inspector_panel_tilebar.y + 4, 16, WHITE);
 
+    // Name Textbox =======================================================================================
+
     if (object_count > 0 && actual_object >= 0 && actual_object < object_count)
     {
         GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, ColorToInt(WHITE));
@@ -187,6 +189,8 @@ void inspector(void)
             textBoxEditMode = !textBoxEditMode;
         }
     }
+
+    // Sprite Options =====================================================================================
 
     if (object_count > 0 && actual_object >= 0 && actual_object < object_count)
     {
@@ -211,13 +215,59 @@ void inspector(void)
             objects[actual_object].renderer.graphic = SpriteOptions_active;
         }
     }
+
+    // Change Object Color ===========================================================================================
+
     if (object_count > 0 && actual_object >= 0 && actual_object < object_count)
     {
-        Rectangle Color_rect = { position_x + 50, position_y + 200, 200, 200 };
-        if (GuiColorPicker(Color_rect, "Color", &objects[actual_object].renderer.color)) return;
-        
+        GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,    ColorToInt(objects[actual_object].renderer.color));
+        GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED,   ColorToInt(objects[actual_object].renderer.color));
+        GuiSetStyle(BUTTON, BASE_COLOR_PRESSED,   ColorToInt(objects[actual_object].renderer.color));
+        const int Color_button_size = 25;
+        Rectangle Color_button = { position_x + 50, position_y + 150, Color_button_size, Color_button_size};
+        static bool Color_rect_EditMode = false;
+
+        if (GuiButton(Color_button, ""))
+        {
+            Color_rect_EditMode = !Color_rect_EditMode; 
+        }
+
+        if (Color_rect_EditMode)
+        {
+            GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,    ColorToInt(RED));
+            GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED,   ColorToInt(RED));
+            GuiSetStyle(BUTTON, BASE_COLOR_PRESSED,   ColorToInt(RED));
+            Rectangle Color_rect_window = { position_x + 50, position_y + 200, 300, 400 };
+
+            if (GuiWindowBox(Color_rect_window, "Color"))
+            {
+                Color_rect_EditMode = false;
+            }
+
+            Rectangle Color_rect = { position_x + 70, position_y + 250, 200, 200 };
+            GuiColorPicker(Color_rect, NULL, &objects[actual_object].renderer.color);
+        }
     }
+
+    // Transform Object ==============================================================================================
     
+    if (object_count > 0 && actual_object >= 0 && actual_object < object_count)
+    {
+        Rectangle Transform_pos_x = { position_x + 50, position_y + 500, 300, 25 };
+        
+        static char pos_x_buffer[32] = "";
+        static bool Transform_pos_x_EditMode = false;
+        
+        if (!Transform_pos_x_EditMode)
+        {
+            snprintf(pos_x_buffer, sizeof(pos_x_buffer), "%.1f", objects[actual_object].transform.pos_x);
+        }
+        
+        if (GuiValueBoxFloat(Transform_pos_x, "Position X", pos_x_buffer, &objects[actual_object].transform.pos_x, Transform_pos_x_EditMode))
+        {
+            Transform_pos_x_EditMode = !Transform_pos_x_EditMode;
+        }
+    }
 }
 
 // =============================================================================================================
@@ -356,6 +406,11 @@ void viewport(void)
 
     BeginScissorMode(position_x, position_y + 22, size_x, size_y - 22);
     
+    const float world_x_screen_y = 0.0f * zoom + view_offset.y;
+    const float world_y_screen_x = 0.0f * zoom + view_offset.x;
+    DrawLine(position_x, (int)world_x_screen_y, position_x + size_x, (int)world_x_screen_y, RED);
+    DrawLine((int)world_y_screen_x, position_y + 22, (int)world_y_screen_x, position_y + size_y, GREEN);
+
     for (unsigned int i = 0; i < object_count; i++)
     {
         Vector2 position = { 
@@ -424,7 +479,7 @@ void viewport(void)
         int clicked_index = -1;
 
         // Sprawdzamy wszystkie obiekty które zostały kliknięte
-        for (int i = (int)object_count - 1; i >= 0; i--)
+        for (int i = object_count - 1; i >= 0; i--)
         {
             Rectangle obj_rect = { 
                 objects[i].transform.pos_x * zoom + view_offset.x,
@@ -456,7 +511,7 @@ void viewport(void)
         int current_index = -1;
         for (unsigned int i = 0; i < object_count; i++)
         {
-            if (objects[i].ID == actual_object) { current_index = (int)i; break; }
+            if (objects[i].ID == actual_object) { current_index = i; break; }
         }
 
         if (current_index != -1)
