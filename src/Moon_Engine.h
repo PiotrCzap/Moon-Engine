@@ -40,6 +40,8 @@ typedef struct GameObject
     SpriteRenderer renderer;
 } GameObject;
 
-
+extern GameObject objects[MAX_OBJECTS];
+extern int object_count;
+extern int actual_object;
 
 #endif

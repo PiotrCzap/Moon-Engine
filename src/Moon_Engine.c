@@ -271,8 +271,25 @@ void inspector(void)
 }
 
 // =============================================================================================================
+// CODE GENERATOR
+// =============================================================================================================
+
+void code_generator()
+{
+
+    int compile_result = system("gcc build/game.c -O3 -lraylib -lGL -lm -lpthread -ldl -o game");
+    if (compile_result == 0)
+    {
+        system("./game");
+    }
+}
+
+// =============================================================================================================
 // VIEWPORT
 // =============================================================================================================
+
+// 0 = editor  1 = play
+int play_mode = 0; 
 
 void viewport(void)
 {
@@ -529,27 +546,80 @@ void viewport(void)
     int Tilebar_size_y = 22;
     DrawRectangle(Tilebar_position_x, Tilebar_position_y, Tilebar_size_x, Tilebar_size_y, darker_background);
     DrawText("VIEWPORT", Tilebar_position_x + 4, Tilebar_position_y + 4, 16, WHITE);
+
+    // play button
+
+    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,    ColorToInt(RED));
+    GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED,   ColorToInt((Color){ 255, 255, 255, 40 }));
+    GuiSetStyle(BUTTON, BASE_COLOR_PRESSED,   ColorToInt((Color){ 255, 255, 255, 80 }));
+    Rectangle play_button = {Tilebar_position_x + 450, Tilebar_position_y + 4, 16, 16};
+    if (GuiButton(play_button, ""))
+    {
+        play_mode = 1;
+    }
 }
 
 // =============================================================================================================
 // MAIN
 // =============================================================================================================
 
+void game(void)
+{
+    if (IsKeyPressed(KEY_ESCAPE))
+    {
+        play_mode = 0;
+    }
+    
+    for (int i = 0; i < object_count; i++)
+    {
+        if (objects[i].renderer.graphic == 0)
+        {
+           DrawRectangle(objects[i].transform.pos_x, objects[i].transform.pos_y, objects[i].transform.size_x, objects[i].transform.size_y, objects[i].renderer.color);
+        }
+        if (objects[i].renderer.graphic == 1)
+        {
+            Vector2 v1 = { objects[i].transform.pos_x + objects[i].transform.size_x / 2.0f, objects[i].transform.pos_y };
+            Vector2 v2 = { objects[i].transform.pos_x, objects[i].transform.pos_y + objects[i].transform.size_y };
+            Vector2 v3 = { objects[i].transform.pos_x + objects[i].transform.size_x, objects[i].transform.pos_y + objects[i].transform.size_y };
+            
+            DrawTriangle(v1, v2, v3, objects[i].renderer.color);
+        }
+        if (objects[i].renderer.graphic == 2)
+        {
+            Vector2 center = { objects[i].transform.pos_x + objects[i].transform.size_x / 2.0f, objects[i].transform.pos_y+ objects[i].transform.size_y / 2.0f };
+            float radius = (objects[i].transform.size_x < objects[i].transform.size_y ? objects[i].transform.size_x : objects[i].transform.size_y) / 2.0f;
+            
+            DrawCircleV(center, radius, objects[i].renderer.color);
+        }
+        
+        
+    }
+}
+
+
 int main(void)
 {
     InitWindow(1920, 1080, "Moon Engine");
     SetTargetFPS(60);
-    ToggleFullscreen();
+    //ToggleFullscreen();
+    SetExitKey(KEY_NULL);
     while (!WindowShouldClose())
     {
-        ClearBackground(BLACK);
+        ClearBackground(background);
         BeginDrawing();
-        DrawRectangle(0, 0, 1920, 1080, background);
-        viewport();
-        editor_tilebar();
-        file_manager();
-        inspector();
-        hierarchy();
+        if (play_mode == 0)
+        {
+            DrawRectangle(0, 0, 1920, 1080, background);
+            viewport();
+            editor_tilebar();
+            file_manager();
+            inspector();
+            hierarchy();
+        }
+        else
+        {
+            game();
+        }
         EndDrawing();
 
     }
