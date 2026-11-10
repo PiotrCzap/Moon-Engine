@@ -108,9 +108,9 @@ void hierarchy(void)
     
     // more options
     
-    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,    ColorToInt((Color){ 0, 0, 0, 0 }));
-    GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED,   ColorToInt((Color){ 255, 255, 255, 40 }));
-    GuiSetStyle(BUTTON, BASE_COLOR_PRESSED,   ColorToInt((Color){ 255, 255, 255, 80 }));
+    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL,    ColorToInt((Color){ 0u, 0u, 0u, 0u }));
+    GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED,   ColorToInt((Color){ 255u, 255u, 255u, 40u }));
+    GuiSetStyle(BUTTON, BASE_COLOR_PRESSED,   ColorToInt((Color){ 255u, 255u, 255u, 80u }));
 
     GuiSetStyle(BUTTON, BORDER_COLOR_NORMAL,  ColorToInt(WHITE));
     GuiSetStyle(BUTTON, BORDER_COLOR_FOCUSED, ColorToInt(WHITE));
@@ -251,9 +251,15 @@ void inspector(void)
 
     // Transform Object ==============================================================================================
     
+    GuiSetStyle(VALUEBOX, TEXT_COLOR_NORMAL, ColorToInt(WHITE));
+    GuiSetStyle(VALUEBOX, BORDER_COLOR_NORMAL, ColorToInt(darkers_background));
+
     if (object_count > 0 && actual_object >= 0 && actual_object < object_count)
     {
-        Rectangle Transform_pos_x = { position_x + 50, position_y + 500, 300, 25 };
+        // POSITION =========================================================================================
+
+        // Transform Position X
+        Rectangle Transform_pos_x = { position_x + 100, position_y + 500, 150, 25 };
         
         static char pos_x_buffer[32] = "";
         static bool Transform_pos_x_EditMode = false;
@@ -263,10 +269,94 @@ void inspector(void)
             snprintf(pos_x_buffer, sizeof(pos_x_buffer), "%.1f", objects[actual_object].transform.pos_x);
         }
         
-        if (GuiValueBoxFloat(Transform_pos_x, "Position X", pos_x_buffer, &objects[actual_object].transform.pos_x, Transform_pos_x_EditMode))
+        if (GuiValueBoxFloat(Transform_pos_x, "Position X ", pos_x_buffer, &objects[actual_object].transform.pos_x, Transform_pos_x_EditMode))
         {
             Transform_pos_x_EditMode = !Transform_pos_x_EditMode;
         }
+
+        // Transform Position Y
+
+        Rectangle Transform_pos_y = { position_x + 100, position_y + 530, 150, 25 };
+        
+        static char pos_y_buffer[32] = "";
+        static bool Transform_pos_y_EditMode = false;
+        
+        if (!Transform_pos_y_EditMode)
+        {
+            snprintf(pos_y_buffer, sizeof(pos_y_buffer), "%.1f", objects[actual_object].transform.pos_y);
+        }
+        
+        if (GuiValueBoxFloat(Transform_pos_y, "Position Y ", pos_y_buffer, &objects[actual_object].transform.pos_y, Transform_pos_y_EditMode))
+        {
+            Transform_pos_y_EditMode = !Transform_pos_y_EditMode;
+        }
+
+        // Transform Position Z
+        Rectangle Transform_pos_z = { position_x + 100, position_y + 560, 150, 25 };
+        
+        static char pos_z_buffer[32] = "";
+        static bool Transform_pos_z_EditMode = false;
+        
+        if (!Transform_pos_z_EditMode)
+        {
+            snprintf(pos_z_buffer, sizeof(pos_z_buffer), "%.1f", objects[actual_object].transform.pos_z);
+        }
+        
+        if (GuiValueBoxFloat(Transform_pos_z, "Position Z ", pos_z_buffer, &objects[actual_object].transform.pos_z, Transform_pos_z_EditMode))
+        {
+            Transform_pos_z_EditMode = !Transform_pos_z_EditMode;
+        }
+
+        // SIZE =========================================================================================
+
+        // Transform Size X
+        Rectangle Transform_size_x = { position_x + 100, position_y + 590, 150, 25 };
+        
+        static char size_x_buffer[32] = "";
+        static bool Transform_size_x_EditMode = false;
+        
+        if (!Transform_size_x_EditMode)
+        {
+            snprintf(size_x_buffer, sizeof(size_x_buffer), "%.1f", objects[actual_object].transform.size_x);
+        }
+        
+        if (GuiValueBoxFloat(Transform_size_x, "Size X ", size_x_buffer, &objects[actual_object].transform.size_x, Transform_size_x_EditMode))
+        {
+            Transform_size_x_EditMode = !Transform_size_x_EditMode;
+        }
+
+        // Transform Size Y
+        Rectangle Transform_size_y = { position_x + 100, position_y + 620, 150, 25 };
+        
+        static char size_y_buffer[32] = "";
+        static bool Transform_size_y_EditMode = false;
+        
+        if (!Transform_size_y_EditMode)
+        {
+            snprintf(size_y_buffer, sizeof(size_y_buffer), "%.1f", objects[actual_object].transform.size_y);
+        }
+        
+        if (GuiValueBoxFloat(Transform_size_y, "Size Y ", size_y_buffer, &objects[actual_object].transform.size_y, Transform_size_y_EditMode))
+        {
+            Transform_size_y_EditMode = !Transform_size_y_EditMode;
+        }
+
+        // Transform Size Z
+        Rectangle Transform_size_z = { position_x + 100, position_y + 650, 150, 25 };
+        
+        static char size_z_buffer[32] = "";
+        static bool Transform_size_z_EditMode = false;
+        
+        if (!Transform_size_z_EditMode)
+        {
+            snprintf(size_z_buffer, sizeof(size_z_buffer), "%.1f", objects[actual_object].transform.size_z);
+        }
+        
+        if (GuiValueBoxFloat(Transform_size_z, "Size Z ", size_z_buffer, &objects[actual_object].transform.size_z, Transform_size_z_EditMode))
+        {
+            Transform_size_z_EditMode = !Transform_size_z_EditMode;
+        }
+
     }
 }
 
@@ -276,7 +366,6 @@ void inspector(void)
 
 void code_generator()
 {
-
     int compile_result = system("gcc build/game.c -O3 -lraylib -lGL -lm -lpthread -ldl -o game");
     if (compile_result == 0)
     {
@@ -425,8 +514,8 @@ void viewport(void)
     
     const float world_x_screen_y = 0.0f * zoom + view_offset.y;
     const float world_y_screen_x = 0.0f * zoom + view_offset.x;
-    DrawLine(position_x, (int)world_x_screen_y, position_x + size_x, (int)world_x_screen_y, RED);
-    DrawLine((int)world_y_screen_x, position_y + 22, (int)world_y_screen_x, position_y + size_y, GREEN);
+    DrawLine(position_x, (int)world_x_screen_y, position_x + size_x, (int)world_x_screen_y, RED); // oś x
+    DrawLine((int)world_y_screen_x, position_y + 22, (int)world_y_screen_x, position_y + size_y, GREEN); // oś y
 
     for (unsigned int i = 0; i < object_count; i++)
     {
