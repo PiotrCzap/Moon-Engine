@@ -158,6 +158,44 @@ void file_manager(void)
 }
 
 // =============================================================================================================
+// UTILITIES
+// =============================================================================================================
+
+void drag_float(const Rectangle Square, float *Data, const float sensitivity)
+{
+    Vector2 mouse_pos = GetMousePosition();
+    static bool is_dragging = false;
+    
+    static Vector2 start_mouse_pos = { 0 };
+
+    if (!is_dragging)
+    {
+        if (CheckCollisionPointRec(mouse_pos, Square) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            is_dragging = true;
+            start_mouse_pos = mouse_pos;
+            HideCursor();
+        }
+    }
+    else
+    {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            Vector2 mouse_delta = GetMouseDelta();
+            
+            *Data += mouse_delta.x * sensitivity;
+
+            SetMousePosition(start_mouse_pos.x, start_mouse_pos.y);
+        }
+        else
+        {
+            is_dragging = false;
+            ShowCursor();
+        }
+    }
+}
+
+// =============================================================================================================
 // INSPECTOR
 // =============================================================================================================
 
@@ -250,19 +288,28 @@ void inspector(void)
     }
 
     // Transform Object ==============================================================================================
-    
+
     GuiSetStyle(VALUEBOX, TEXT_COLOR_NORMAL, ColorToInt(WHITE));
-    GuiSetStyle(VALUEBOX, BORDER_COLOR_NORMAL, ColorToInt(darkers_background));
+    GuiSetStyle(VALUEBOX, BORDER_COLOR_NORMAL, ColorToInt(BLACK));
+    GuiSetStyle(VALUEBOX, BORDER_WIDTH, 1);
 
     if (object_count > 0 && actual_object >= 0 && actual_object < object_count)
     {
         // POSITION =========================================================================================
-
-        // Transform Position X
-        Rectangle Transform_pos_x = { position_x + 100, position_y + 500, 150, 25 };
+        DrawRectangle(position_x + 50, 128, 300, 20, darker_background);
+        DrawText("Transform", position_x + 50, 128, 16, WHITE);
+        DrawText("Position", position_x + 50, 150, 16, WHITE);
         
+        // Transform Position X
+        Rectangle Transform_pos_x = { position_x + 100, position_y + 500, 150, 20 };
+        
+        DrawRectangle(Transform_pos_x.x, Transform_pos_x.y, 150, 25, dark_background);
+
         static char pos_x_buffer[32] = "";
         static bool Transform_pos_x_EditMode = false;
+
+        drag_float(Transform_pos_x, &objects[actual_object].transform.pos_x, 0.1f);
+        
         
         if (!Transform_pos_x_EditMode)
         {
@@ -278,6 +325,8 @@ void inspector(void)
 
         Rectangle Transform_pos_y = { position_x + 100, position_y + 530, 150, 25 };
         
+        DrawRectangle(Transform_pos_y.x, Transform_pos_y.y, 150, 25, dark_background);
+
         static char pos_y_buffer[32] = "";
         static bool Transform_pos_y_EditMode = false;
         
@@ -293,6 +342,8 @@ void inspector(void)
 
         // Transform Position Z
         Rectangle Transform_pos_z = { position_x + 100, position_y + 560, 150, 25 };
+
+        DrawRectangle(Transform_pos_z.x, Transform_pos_z.y, 150, 25, dark_background);
         
         static char pos_z_buffer[32] = "";
         static bool Transform_pos_z_EditMode = false;
@@ -312,6 +363,8 @@ void inspector(void)
         // Transform Size X
         Rectangle Transform_size_x = { position_x + 100, position_y + 590, 150, 25 };
         
+        DrawRectangle(Transform_size_x.x, Transform_size_x.y, 150, 25, dark_background);
+
         static char size_x_buffer[32] = "";
         static bool Transform_size_x_EditMode = false;
         
@@ -328,6 +381,8 @@ void inspector(void)
         // Transform Size Y
         Rectangle Transform_size_y = { position_x + 100, position_y + 620, 150, 25 };
         
+        DrawRectangle(Transform_size_y.x, Transform_size_y.y, 150, 25, dark_background);
+
         static char size_y_buffer[32] = "";
         static bool Transform_size_y_EditMode = false;
         
@@ -344,6 +399,8 @@ void inspector(void)
         // Transform Size Z
         Rectangle Transform_size_z = { position_x + 100, position_y + 650, 150, 25 };
         
+        DrawRectangle(Transform_size_z.x, Transform_size_z.y, 150, 25, dark_background);
+
         static char size_z_buffer[32] = "";
         static bool Transform_size_z_EditMode = false;
         
