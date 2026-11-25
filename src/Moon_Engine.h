@@ -1,43 +1,50 @@
 #ifndef MOON_ENGINE_H
 #define MOON_ENGINE_H
 
+#include <stdio.h>
 #include "raylib.h"
 
-#define MAX_NAME_LEN 32
-#define MAX_OBJECTS  128
+void ME_CreateWindow(int size_x, int size_y, const char *title);
+void ME_Render(void);
+void ME_Update(void);
+void ME_Start(void);
+Camera2D InitCamera(Vector2 target, float zoom);
 
-// ======================================================================
-// Components
-// ======================================================================
 
-typedef struct ObjectTransform
+#ifdef MOON_ENGINE_IMPLEMENTATION
+
+void ME_CreateWindow(const int size_x, const int size_y, const char *title)
 {
-    float pos_x, pos_y, pos_z;
-    float size_x, size_y, size_z;
-} ObjectTransform;
+    InitWindow(size_x, size_y, title);
+    SetTargetFPS(60);
 
-typedef struct SpriteRenderer
+    ME_Start();
+
+    while (!WindowShouldClose())
+    {
+        ME_Update();
+
+        BeginDrawing();
+            ClearBackground(BLACK);
+            ME_Render();
+        EndDrawing();
+    }
+
+    CloseWindow();
+}
+
+Camera2D InitCamera(Vector2 target, float zoom)
 {
-    int graphic;
-    Texture2D sprite;   // albo int, jeśli na razie trzymasz tylko numer
-    Color color;        // zamiast int, żeby od razu pasowało do raylib
-} SpriteRenderer;
+    Camera2D camera = {0};
+    camera.target = target;
+    camera.offset = (Vector2){
+        GetScreenWidth() * 0.5f,
+        GetScreenHeight() * 0.5f
+    };
+    camera.rotation = 0.0f;
+    camera.zoom = (zoom > 0.01f) ? zoom : 1.0f;
+    return camera;
+}
 
-
-typedef struct Category
-{
-    const char name[MAX_NAME_LEN];
-} Category;
-
-typedef struct GameObject
-{
-    int ID;
-    char name[MAX_NAME_LEN];
-    int visible;
-    int active;
-
-    ObjectTransform transform;
-    SpriteRenderer renderer;
-} GameObject;
-
+#endif
 #endif
